@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>⚡️ Solar Power — Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+:root{
+  --gold:#B8860B;
+  --gold-bright:#D4AF37;
+  --navy:#0a1d3a;
+  --navy-deep:#061226;
+  --card-bg: radial-gradient(circle at top left, rgba(80,140,255,0.30) 0%, transparent 60%),
+             radial-gradient(circle at bottom right, rgba(30,60,120,0.45) 0%, transparent 65%),
+             #0a1d3a;
+  --text-white:#ffffff;
+  --text-dim:#cdd8ec;
+  --green-on:#0b3d24;
+  --green-on-bright:#1ecb6b;
+  --red-off:#5a1018;
+  --red-off-bright:#ff3b4e;
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;-webkit-tap-highlight-color:transparent;}
+body{
+  background:var(--navy-deep);
+  background-image: radial-gradient(circle at 20% 0%, rgba(212,175,55,0.08) 0%, transparent 50%);
+  min-height:100vh;
+  display:flex;justify-content:center;
+  color:var(--text-white);
+}
+#app{width:100%;max-width:520px;min-height:100vh;display:flex;flex-direction:column;padding:16px 14px 50px;}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:10px;}
+
+/* ---------- LOGIN GATE ---------- */
+#gate{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px; text-align:center; padding:30px 10px;
+}
+#gate .lock-icon{font-size:42px;color:var(--gold-bright);}
+#gate h1{font-size:20px;font-weight:900;letter-spacing:0.5px;}
+#gate input{
+  width:100%;max-width:320px;background:rgba(255,255,255,0.06);
+  border:1px solid var(--gold);border-radius:var(--radius-sm);
+  padding:14px;color:#fff;font-size:16px;font-weight:700;text-align:center;outline:none;
+  letter-spacing:2px;
+}
+#gate input::placeholder{color:#8ea0c2;letter-spacing:0;font-weight:500;}
+#gate button{
+  width:100%;max-width:320px;padding:14px;border-radius:var(--radius-sm);
+  border:1px solid var(--gold-bright);background:var(--card-bg);color:#fff;
+  font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;
+}
+#gate .err{color:var(--red-off-bright);font-size:12px;font-weight:700;min-height:16px;}
+#gate .setup-note{font-size:11px;color:#8ea0c2;max-width:340px;line-height:1.5;}
+
+/* ---------- TOP NAV (4 square buttons) ---------- */
+#admin-root{display:none;flex-direction:column;gap:14px;}
+
+.top-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.nav-sq{
+  aspect-ratio:1/1;border-radius:var(--radius-md);
+  background:var(--card-bg);
+  border:1.5px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer; transition:transform .15s ease, border-color .15s ease;
+  position:relative;
+}
+.nav-sq:active{transform:scale(0.95);}
+.nav-sq.active{border-color:var(--gold-bright);box-shadow:0 0 0 1px var(--gold-bright) inset;}
+.nav-sq i{font-size:22px;color:var(--gold-bright);}
+.nav-sq span{font-size:10.5px;font-weight:800;color:#fff;text-align:center;letter-spacing:0.2px;}
+.nav-sq .badge{
+  position:absolute;top:-6px;right:-6px;background:var(--red-off-bright);color:#fff;
+  font-size:10px;font-weight:800;border-radius:999px;min-width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;
+  border:1px solid var(--navy-deep);
+}
+
+/* ---------- ADMIN INFO big bar ---------- */
+.admin-info-btn{
+  width:100%;padding:14px 16px;border-radius:var(--radius-md);
+  background:var(--card-bg);border:1.5px solid var(--gold);
+  color:#fff;font-weight:900;font-size:14px;letter-spacing:1px;text-align:center;cursor:pointer;
+}
+.admin-info-panel{
+  display:none;flex-direction:column;gap:0;
+  background:var(--card-bg);border:1.5px solid var(--gold);border-radius:var(--radius-md);
+  overflow:hidden;
+}
+.admin-info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;border-bottom:1px solid rgba(212,175,55,0.25);
+  font-size:12.5px;
+}
+.admin-info-row:last-child{border-bottom:none;}
+.admin-info-row .lbl{color:var(--text-dim);font-weight:600;}
+.admin-info-row .val{color:#fff;font-weight:900;font-size:14px;}
+
+/* ---------- generic section card ---------- */
+.section-card{
+  background:var(--card-bg);border:1.5px solid var(--gold);border-radius:var(--radius-md);
+  padding:14px;display:flex;flex-direction:column;gap:10px;
+}
+.section-title{font-size:13px;font-weight:900;letter-spacing:0.5px;color:#fff;display:flex;align-items:center;gap:8px;}
+.section-title i{color:var(--gold-bright);}
+
+/* ---------- toggle squares row (4) ---------- */
+.toggle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.toggle-sq{
+  aspect-ratio:1/1;border-radius:var(--radius-md);
+  border:1.5px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;text-align:center;padding:6px;
+  background:var(--red-off);
+  transition:background .25s ease, border-color .25s ease;
+}
+.toggle-sq i{font-size:18px;color:#fff;}
+.toggle-sq span{font-size:9.5px;font-weight:800;color:#fff;line-height:1.2;}
+.toggle-sq.on{background:var(--green-on);border-color:var(--green-on-bright);}
+.toggle-sq.on i{color:var(--green-on-bright);}
+.toggle-sq.danger{background:#3a0a10;border-color:var(--red-off-bright);}
+.toggle-sq.danger i{color:var(--red-off-bright);}
+
+/* ---------- views (full screen sections) ---------- */
+.view{display:none;flex-direction:column;gap:12px;}
+.view.active{display:flex;}
+.view-header{display:flex;align-items:center;gap:10px;}
+.back-btn{
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--gold);
+  background:rgba(255,255,255,0.05);color:#fff;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+}
+.view-header h2{font-size:16px;font-weight:900;}
+
+/* search bar */
+.search-bar{
+  display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);
+  border:1px solid var(--gold);border-radius:var(--radius-sm);padding:10px 14px;
+}
+.search-bar i{color:var(--gold-bright);}
+.search-bar input{
+  flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:14px;font-weight:600;
+}
+.search-bar input::placeholder{color:#8ea0c2;font-weight:500;}
+
+/* tab pair (e.g. Premium/Regular, approved/unapproved, read/unread) */
+.tab-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tab-btn{
+  padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--gold);
+  background:rgba(255,255,255,0.04);color:#fff;font-weight:800;font-size:12.5px;
+  text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:3px;
+}
+.tab-btn .count{font-size:18px;font-weight:900;}
+.tab-btn.active{background:var(--card-bg);border-color:var(--gold-bright);}
+
+.list-wrap{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;padding-right:2px;}
+.list-empty{text-align:center;color:#8ea0c2;font-size:12px;padding:20px 0;}
+
+.row-card{
+  background:rgba(255,255,255,0.05);border:1px solid var(--gold);border-radius:12px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:6px;cursor:pointer;
+}
+.row-card .row-top{display:flex;justify-content:space-between;align-items:center;}
+.row-card .row-id{font-weight:900;font-size:13px;color:#fff;}
+.row-card .row-sub{font-size:11px;color:var(--text-dim);}
+.row-card .row-tag{
+  font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px;border:1px solid var(--gold-bright);
+  color:var(--gold-bright);
+}
+
+/* user profile editor */
+.field-block{display:flex;flex-direction:column;gap:4px;}
+.field-block .f-label{font-size:11px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;}
+.field-row{display:flex;align-items:center;gap:8px;}
+.field-row input{
+  flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--gold);border-radius:8px;
+  padding:10px 12px;color:#fff;font-size:13px;font-weight:600;outline:none;
+}
+.field-row input:disabled{color:var(--text-dim);}
+.pencil-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--gold-bright);background:rgba(212,175,55,0.12);
+  color:var(--gold-bright);cursor:pointer;flex-shrink:0;
+}
+.save-row{display:flex;gap:8px;}
+.btn-primary{
+  flex:1;padding:13px;border-radius:var(--radius-sm);border:1px solid var(--gold-bright);
+  background:var(--card-bg);color:#fff;font-weight:800;font-size:13px;cursor:pointer;
+}
+.btn-secondary{
+  flex:1;padding:13px;border-radius:var(--radius-sm);border:1px solid #555;
+  background:rgba(255,255,255,0.05);color:#cdd8ec;font-weight:800;font-size:13px;cursor:pointer;
+}
+.btn-danger{
+  flex:1;padding:13px;border-radius:var(--radius-sm);border:1px solid var(--red-off-bright);
+  background:rgba(255,59,78,0.12);color:#ff8a96;font-weight:800;font-size:13px;cursor:pointer;
+}
+
+/* chat thread */
+.chat-thread{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding:8px;}
+.msg{max-width:78%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.35;}
+.msg.user{align-self:flex-start;background:rgba(255,255,255,0.08);border:1px solid var(--gold);}
+.msg.admin{align-self:flex-end;background:var(--card-bg);border:1px solid var(--gold-bright);}
+.msg .ts{display:block;font-size:9px;color:#8ea0c2;margin-top:4px;}
+.chat-input-row{display:flex;gap:8px;}
+.chat-input-row input{
+  flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--gold);border-radius:var(--radius-sm);
+  padding:12px;color:#fff;font-size:13px;outline:none;
+}
+.send-btn{
+  width:46px;border-radius:var(--radius-sm);border:1px solid var(--gold-bright);background:var(--card-bg);
+  color:#fff;cursor:pointer;
+}
+
+/* toast */
+#toast{
+  position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#111;border:1px solid var(--gold);color:#fff;padding:12px 18px;border-radius:10px;
+  font-size:13px;font-weight:700;opacity:0;transition:all .25s ease;z-index:999;max-width:90%;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.error{border-color:var(--red-off-bright);}
+#toast.success{border-color:var(--green-on-bright);}
+
+/* modal (phrase confirm) */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:998;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:var(--card-bg);border:1.5px solid var(--red-off-bright);border-radius:var(--radius-md);
+  padding:20px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;
+}
+.modal-box h3{font-size:15px;font-weight:900;color:#ff8a96;}
+.modal-box p{font-size:12px;color:var(--text-dim);line-height:1.5;}
+.modal-box input{
+  background:rgba(255,255,255,0.06);border:1px solid var(--red-off-bright);border-radius:8px;
+  padding:12px;color:#fff;font-size:13px;outline:none;
+}
+
+.small-note{font-size:10.5px;color:#8ea0c2;text-align:center;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ LOGIN GATE ============ -->
+  <div id="gate">
+    <i class="fas fa-lock lock-icon"></i>
+    <h1>SOLAR POWER — ADMIN ACCESS</h1>
+    <input type="password" id="gate-pass" placeholder="Admin password" autocomplete="off">
+    <button onclick="Admin.tryLogin()">UNLOCK</button>
+    <div class="err" id="gate-err"></div>
+    <div class="setup-note" id="gate-setup-note"></div>
+  </div>
+
+  <!-- ============ ADMIN ROOT ============ -->
+  <div id="admin-root">
+
+    <!-- HOME (nav + admin info + toggles) -->
+    <div class="view active" id="view-home">
+
+      <div class="top-nav">
+        <div class="nav-sq" onclick="Admin.openView('users')">
+          <i class="fas fa-user"></i><span>Users</span>
+        </div>
+        <div class="nav-sq" onclick="Admin.openView('transactions')">
+          <i class="fas fa-money-bill-transfer"></i><span>Transactions</span>
+          <div class="badge" id="badge-tx" style="display:none;"></div>
+        </div>
+        <div class="nav-sq" onclick="Admin.openView('chat')">
+          <i class="fas fa-comments"></i><span>Chat Support</span>
+          <div class="badge" id="badge-chat" style="display:none;"></div>
+        </div>
+        <div class="nav-sq" onclick="Admin.openView('devices')">
+          <i class="fas fa-network-wired"></i><span>Data</span>
+        </div>
+      </div>
+
+      <div class="admin-info-btn" onclick="Admin.toggleInfoPanel()">
+        <i class="fas fa-chart-line"></i> &nbsp;ADMIN INFO
+      </div>
+      <div class="admin-info-panel" id="admin-info-panel">
+        <div class="admin-info-row"><span class="lbl">Total invested (active packages)</span><span class="val" id="info-invested">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Total withdrawn</span><span class="val" id="info-withdrawn">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Pending withdrawals</span><span class="val" id="info-pending">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Total user balance (combined)</span><span class="val" id="info-balance">—</span></div>
+        <div class="admin-info-row"><span class="lbl">New users (last 24h)</span><span class="val" id="info-new24h">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Total users in database</span><span class="val" id="info-totalusers">—</span></div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title"><i class="fas fa-solar-panel"></i> Activate Investment Package</div>
+        <div class="small-note">Existing logic — unchanged. Use the main app for this.</div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title"><i class="fas fa-layer-group"></i> Edit Package Quantity</div>
+        <select id="edit-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;"></select>
+        <div class="field-row">
+          <input type="number" id="edit-pkg-qty" placeholder="Remaining quantity">
+          <button class="pencil-btn" onclick="Admin.savePkgQty()"><i class="fas fa-check"></i></button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title"><i class="fas fa-bullhorn"></i> Global Broadcast</div>
+        <textarea id="broadcast-text" rows="3" placeholder="Message shown to all users..." style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-size:13px;font-weight:600;resize:none;"></textarea>
+        <button class="btn-primary" onclick="Admin.sendBroadcast()">Send to all users</button>
+      </div>
+
+      <div class="toggle-grid">
+        <div class="toggle-sq" id="tgl-promo" onclick="Admin.toggleSetting('isPromoActive','tgl-promo')">
+          <i class="fas fa-clock"></i><span>Start 24h Promo</span>
+        </div>
+        <div class="toggle-sq" id="tgl-legendary" onclick="Admin.toggleSetting('solarInfinityEnabled','tgl-legendary')">
+          <i class="fas fa-star"></i><span>Enable Solar Legendary</span>
+        </div>
+        <div class="toggle-sq" id="tgl-lock" onclick="Admin.toggleSetting('withdrawalsFrozen','tgl-lock')">
+          <i class="fas fa-lock"></i><span>Enable Lock Mode</span>
+        </div>
+        <div class="toggle-sq danger" id="tgl-wipe" onclick="Admin.openWipeModal()">
+          <i class="fas fa-radiation"></i><span>Wipe Database</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ USERS VIEW ============ -->
+    <div class="view" id="view-users">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
+        <h2>Users</h2>
+      </div>
+      <div class="search-bar">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="users-search" placeholder="Search by ID, phone or name..." oninput="Admin.renderUsersList()">
+      </div>
+      <div class="tab-pair">
+        <div class="tab-btn active" id="utab-premium" onclick="Admin.switchUsersTab('premium')">
+          <span>Premium</span><span class="count" id="ucount-premium">0</span>
+        </div>
+        <div class="tab-btn" id="utab-regular" onclick="Admin.switchUsersTab('regular')">
+          <span>Regular</span><span class="count" id="ucount-regular">0</span>
+        </div>
+      </div>
+      <div class="list-wrap" id="users-list"><div class="list-empty">Loading...</div></div>
+    </div>
+
+    <!-- ============ USER PROFILE EDITOR ============ -->
+    <div class="view" id="view-user-edit">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('users')"><i class="fas fa-arrow-left"></i></div>
+        <h2 id="ue-title">User</h2>
+      </div>
+      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> Enter Account</button>
+      <div id="ue-fields" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div class="save-row">
+        <button class="btn-primary" onclick="Admin.saveUserEdits()">Save changes</button>
+      </div>
+    </div>
+
+    <!-- ============ TRANSACTIONS VIEW ============ -->
+    <div class="view" id="view-transactions">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
+        <h2>Transactions</h2>
+      </div>
+      <div class="tab-pair">
+        <div class="tab-btn active" id="ttab-pending" onclick="Admin.switchTxTab('pending')">
+          <span>Unapproved</span><span class="count" id="tcount-pending">0</span>
+        </div>
+        <div class="tab-btn" id="ttab-completed" onclick="Admin.switchTxTab('completed')">
+          <span>Approved</span><span class="count" id="tcount-completed">0</span>
+        </div>
+      </div>
+      <div class="list-wrap" id="tx-list"><div class="list-empty">Loading...</div></div>
+    </div>
+
+    <!-- ============ CHAT SUPPORT VIEW ============ -->
+    <div class="view" id="view-chat">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
+        <h2>Chat Support</h2>
+      </div>
+      <div class="tab-pair">
+        <div class="tab-btn active" id="ctab-unread" onclick="Admin.switchChatTab('unread')">
+          <span>Unread</span><span class="count" id="ccount-unread">0</span>
+        </div>
+        <div class="tab-btn" id="ctab-read" onclick="Admin.switchChatTab('read')">
+          <span>Read</span><span class="count" id="ccount-read">0</span>
+        </div>
+      </div>
+      <div class="list-wrap" id="chat-list"><div class="list-empty">Loading...</div></div>
+    </div>
+
+    <!-- ============ CHAT THREAD VIEW ============ -->
+    <div class="view" id="view-chat-thread">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('chat')"><i class="fas fa-arrow-left"></i></div>
+        <h2 id="ct-title">Chat</h2>
+      </div>
+      <div class="chat-thread" id="ct-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="ct-input" placeholder="Type a reply...">
+        <button class="send-btn" onclick="Admin.sendChatReply()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- ============ DEVICES / DATA VIEW ============ -->
+    <div class="view" id="view-devices">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
+        <h2>Data</h2>
+      </div>
+      <div class="search-bar">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="devices-search" placeholder="Search by user ID..." oninput="Admin.renderDevicesList()">
+      </div>
+      <div class="list-wrap" id="devices-list"><div class="list-empty">Loading...</div></div>
+    </div>
+
+    <!-- ============ DEVICE DETAIL VIEW ============ -->
+    <div class="view" id="view-device-detail">
+      <div class="view-header">
+        <div class="back-btn" onclick="Admin.openView('devices')"><i class="fas fa-arrow-left"></i></div>
+        <h2 id="dd-title">Session data</h2>
+      </div>
+      <div id="dd-fields" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- WIPE CONFIRM MODAL -->
+<div class="modal-overlay" id="wipe-modal">
+  <div class="modal-box">
+    <h3><i class="fas fa-triangle-exclamation"></i> Wipe entire database</h3>
+    <p>This permanently deletes every user, transaction, chat and setting. There is no undo. Type the confirmation phrase to proceed.</p>
+    <input type="password" id="wipe-phrase" placeholder="Confirmation phrase" autocomplete="off">
+    <div class="save-row">
+      <button class="btn-secondary" onclick="Admin.closeWipeModal()">Cancel</button>
+      <button class="btn-danger" onclick="Admin.confirmWipe()">Delete everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   FIREBASE INIT — same project as the main app (solar-power-ono)
+   ========================================================================= */
+const firebaseConfig = {
+    apiKey: "AIzaSyCKD4r6pVA4QRQxOt9zsJ2icBghkPK3_qU",
+    authDomain: "solar-power-ono.firebaseapp.com",
+    databaseURL: "https://solar-power-ono-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "solar-power-ono",
+    storageBucket: "solar-power-ono.firebasestorage.app",
+    messagingSenderId: "263040168510",
+    appId: "1:263040168510:web:46517e20c66bacbfabd76f",
+    measurementId: "G-9HMVSMFW5P"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* =========================================================================
+   SHA-256 helper (Web Crypto) — used so the admin password / wipe phrase
+   are never stored as plain text in this file. Only their hash is compared
+   against a hash stored in the database under admin_config/.
+   ========================================================================= */
+async function sha256(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* =========================================================================
+   Admin object — all panel logic lives here
+   ========================================================================= */
+const Admin = {
+  usersCache: {},
+  withdrawalsCache: {},
+  chatsCache: {},
+  sessionsCache: {},
+  packagesList: [
+    { id: 'solar_start', name: 'Solar Start' },
+    { id: 'sun_basic', name: 'Sun Basic' },
+    { id: 'eco_plus', name: 'Eco Plus' },
+    { id: 'green_power', name: 'Green Power' },
+    { id: 'solar_prime', name: 'Solar Prime' },
+    { id: 'energy_pro', name: 'Energy Pro' },
+    { id: 'sun_elite', name: 'Sun Elite' },
+    { id: 'eco_platinum', name: 'Eco Platinum' },
+    { id: 'solar_infinity', name: 'Solar Infinity' },
+    { id: 'green_titan', name: 'Green Titan' },
+    { id: 'solar_legend', name: 'Solar Legend' },
+    { id: 'solar_power_infinity', name: 'Solar Legendary' }
+  ],
+  usersTab: 'premium',
+  txTab: 'pending',
+  chatTab: 'unread',
+  currentEditKey: null,
+  currentChatUid: null,
+
+  /* ---------------- LOGIN ---------------- */
+  async tryLogin() {
+    const pass = document.getElementById('gate-pass').value.trim();
+    const errEl = document.getElementById('gate-err');
+    errEl.innerText = '';
+    if (!pass) { errEl.innerText = 'Enter the admin password.'; return; }
+
+    let hash;
+    try { hash = await sha256(pass); }
+    catch (e) { errEl.innerText = 'Your browser does not support secure hashing.'; return; }
+
+    try {
+      const snap = await db.ref('admin_config/passwordHash').get();
+      if (!snap.exists()) {
+        // First-time setup: no hash stored yet in the database.
+        document.getElementById('gate-setup-note').innerHTML =
+          'No admin password is configured in the database yet. Run the setup script ' +
+          '(see admin_setup.html) once to store the password hash under <b>admin_config/passwordHash</b>, ' +
+          'then reload this page.';
+        errEl.innerText = 'Admin access is not configured yet.';
+        return;
+      }
+      if (snap.val() === hash) {
+        sessionStorage.setItem('adminUnlocked', '1');
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('admin-root').style.display = 'flex';
+        Admin.boot();
+      } else {
+        errEl.innerText = 'Incorrect password.';
+      }
+    } catch (e) {
+      errEl.innerText = 'Could not reach the database. Check your connection.';
+    }
+  },
+
+  checkExistingSession() {
+    if (sessionStorage.getItem('adminUnlocked') === '1') {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('admin-root').style.display = 'flex';
+      Admin.boot();
+    }
+  },
+
+  /* ---------------- BOOT / NAV ---------------- */
+  boot() {
+    Admin.listenUsers();
+    Admin.listenWithdrawals();
+    Admin.listenChats();
+    Admin.listenSessions();
+    Admin.listenSettings();
+    Admin.populatePkgSelect();
+  },
+
+  openView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const map = {
+      home: 'view-home',
+      users: 'view-users',
+      'user-edit': 'view-user-edit',
+      transactions: 'view-transactions',
+      chat: 'view-chat',
+      'chat-thread': 'view-chat-thread',
+      devices: 'view-devices',
+      'device-detail': 'view-device-detail'
+    };
+    document.getElementById(map[name]).classList.add('active');
+    document.querySelectorAll('.nav-sq').forEach(n => n.classList.remove('active'));
+    if (name === 'users') Admin.renderUsersList();
+    if (name === 'transactions') Admin.renderTxList();
+    if (name === 'chat') Admin.renderChatList();
+    if (name === 'devices') Admin.renderDevicesList();
+  },
+
+  toggleInfoPanel() {
+    const p = document.getElementById('admin-info-panel');
+    const showing = p.style.display === 'flex';
+    p.style.display = showing ? 'none' : 'flex';
+    if (!showing) Admin.renderAdminInfo();
+  },
+
+  toast(msg, type) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.className = 'show' + (type ? ' ' + type : '');
+    setTimeout(() => { t.className = ''; }, 2600);
+  },
+
+  fmt(n) {
+    n = parseFloat(n || 0);
+    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
+  },
+
+  /* ---------------- LIVE LISTENERS ---------------- */
+  listenUsers() {
+    db.ref('users').on('value', snap => {
+      Admin.usersCache = snap.exists() ? snap.val() : {};
+      Admin.renderUsersList();
+      Admin.renderAdminInfo();
+    });
+  },
+
+  listenWithdrawals() {
+    db.ref('withdrawals').on('value', snap => {
+      Admin.withdrawalsCache = snap.exists() ? snap.val() : {};
+      Admin.renderTxList();
+      Admin.renderAdminInfo();
+      Admin.updateBadge('badge-tx', Object.values(Admin.withdrawalsCache).filter(w => (w.status || 'pending') === 'pending').length);
+    });
+  },
+
+  listenChats() {
+    db.ref('support_chats').on('value', snap => {
+      Admin.chatsCache = snap.exists() ? snap.val() : {};
+      Admin.renderChatList();
+      const unread = Object.values(Admin.chatsCache).filter(c => (c.lastTime || 0) > (c.adminRead || 0)).length;
+      Admin.updateBadge('badge-chat', unread);
+    });
+  },
+
+  listenSessions() {
+    db.ref('user_sessions').on('value', snap => {
+      Admin.sessionsCache = snap.exists() ? snap.val() : {};
+      Admin.renderDevicesList();
+    });
+  },
+
+  listenSettings() {
+    db.ref('settings').on('value', snap => {
+      const s = snap.exists() ? snap.val() : {};
+      Admin.setToggleVisual('tgl-promo', !!s.isPromoActive);
+      Admin.setToggleVisual('tgl-legendary', !!s.solarInfinityEnabled);
+      Admin.setToggleVisual('tgl-lock', !!s.withdrawalsFrozen);
+    });
+  },
+
+  updateBadge(id, count) {
+    const b = document.getElementById(id);
+    if (!b) return;
+    if (count > 0) { b.style.display = 'flex'; b.innerText = count > 99 ? '99+' : count; }
+    else b.style.display = 'none';
+  },
+
+  setToggleVisual(id, isOn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('on', isOn);
+  },
+
+  /* ---------------- ADMIN INFO ---------------- */
+  renderAdminInfo() {
+    const users = Admin.usersCache || {};
+    const withdrawals = Admin.withdrawalsCache || {};
+    let totalInvested = 0, totalBalance = 0, newUsers24h = 0, totalUsers = 0;
+    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+    Object.values(users).forEach(u => {
+      totalUsers++;
+      totalBalance += parseFloat(u.balance || 0);
+      if (u.createdAt && u.createdAt >= dayAgo) newUsers24h++;
+      if (u.activePackage && u.activePackage !== 'none' && u.packagePrice) {
+        totalInvested += parseFloat(u.packagePrice || 0);
+      }
+    });
+
+    let totalWithdrawn = 0, pendingAmount = 0;
+    Object.values(withdrawals).forEach(w => {
+      const amt = parseFloat(w.netAmount || w.amount || 0);
+      if ((w.status || 'pending') === 'completed') totalWithdrawn += amt;
+      else pendingAmount += amt;
+    });
+
+    document.getElementById('info-invested').innerText = Admin.fmt(totalInvested);
+    document.getElementById('info-withdrawn').innerText = Admin.fmt(totalWithdrawn);
+    document.getElementById('info-pending').innerText = Admin.fmt(pendingAmount);
+    document.getElementById('info-balance').innerText = Admin.fmt(totalBalance);
+    document.getElementById('info-new24h').innerText = newUsers24h;
+    document.getElementById('info-totalusers').innerText = totalUsers;
+  },
+
+  /* ---------------- USERS LIST ---------------- */
+  switchUsersTab(tab) {
+    Admin.usersTab = tab;
+    document.getElementById('utab-premium').classList.toggle('active', tab === 'premium');
+    document.getElementById('utab-regular').classList.toggle('active', tab === 'regular');
+    Admin.renderUsersList();
+  },
+
+  renderUsersList() {
+    const list = document.getElementById('users-list');
+    if (!list) return;
+    const q = (document.getElementById('users-search').value || '').toLowerCase().trim();
+    const entries = Object.entries(Admin.usersCache || {});
+
+    const premium = entries.filter(([k, u]) => u.activePackage && u.activePackage !== 'none');
+    const regular = entries.filter(([k, u]) => !u.activePackage || u.activePackage === 'none');
+
+    document.getElementById('ucount-premium').innerText = premium.length;
+    document.getElementById('ucount-regular').innerText = regular.length;
+
+    let source = Admin.usersTab === 'premium' ? premium : regular;
+    if (q) {
+      source = source.filter(([k, u]) =>
+        String(u.myCode || k).toLowerCase().includes(q) ||
+        String(u.phone || '').toLowerCase().includes(q) ||
+        String(u.fullName || '').toLowerCase().includes(q)
+      );
+    }
+
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No users found.</div>'; return; }
+
+    list.innerHTML = source.map(([key, u]) => `
+      <div class="row-card" onclick="Admin.openUserEdit('${key}')">
+        <div class="row-top">
+          <span class="row-id">ID: ${u.myCode || key}</span>
+          <span class="row-tag">${u.activePackage && u.activePackage !== 'none' ? (u.activePackage) : 'Regular'}</span>
+        </div>
+        <span class="row-sub">${u.fullName || 'User'} · ${u.phone || '—'} · Balance: ${Admin.fmt(u.balance || 0)}</span>
+      </div>
+    `).join('');
+  },
+
+  /* ---------------- USER EDIT ---------------- */
+  openUserEdit(key) {
+    const u = Admin.usersCache[key];
+    if (!u) return Admin.toast('User not found.', 'error');
+    Admin.currentEditKey = key;
+    document.getElementById('ue-title').innerText = 'ID: ' + (u.myCode || key);
+
+    let totalWithdrawn = 0;
+    if (u.withdrawals) {
+      Object.values(u.withdrawals).forEach(w => {
+        if (w.status === 'completed') totalWithdrawn += parseFloat(w.amount || w.netAmount || 0);
+      });
+    }
+
+    const fields = [
+      { label: 'Total withdrawn', key: null, value: Admin.fmt(totalWithdrawn) },
+      { label: 'Phone number', key: 'phone', value: u.phone || '' },
+      { label: 'Crypto address', key: 'cryptoAddress', value: u.cryptoAddress || '' },
+      { label: 'Password', key: 'password', value: u.password || '' },
+      { label: 'Withdrawal PIN', key: 'withdrawPin', value: u.withdrawPin || '' },
+      { label: 'Registered on', key: null, value: u.createdAt ? new Date(u.createdAt).toLocaleString() : '—' },
+      { label: 'Balance', key: 'balance', value: u.balance || 0 },
+      { label: 'Full name', key: 'fullName', value: u.fullName || '' }
+    ];
+
+    document.getElementById('ue-fields').innerHTML = fields.map((f, i) => `
+      <div class="field-block">
+        <span class="f-label">${f.label}</span>
+        <div class="field-row">
+          <input type="text" id="ue-field-${i}" value="${String(f.value).replace(/"/g, '&quot;')}" data-key="${f.key || ''}" ${f.key ? 'disabled' : 'disabled'}>
+          ${f.key ? `<button class="pencil-btn" onclick="Admin.unlockField(${i})"><i class="fas fa-pencil"></i></button>` : ''}
+        </div>
+      </div>
+    `).join('');
+  },
+
+  unlockField(i) {
+    const el = document.getElementById('ue-field-' + i);
+    el.disabled = false;
+    el.focus();
+  },
+
+  async saveUserEdits() {
+    const key = Admin.currentEditKey;
+    if (!key) return;
+    const updates = {};
+    document.querySelectorAll('#ue-fields input').forEach(input => {
+      const k = input.dataset.key;
+      if (!k) return;
+      let val = input.value;
+      if (k === 'balance') val = parseFloat(val) || 0;
+      updates[k] = val;
+    });
+    try {
+      await db.ref('users/' + key).update(updates);
+      Admin.toast('Changes saved.', 'success');
+    } catch (e) {
+      Admin.toast('Could not save changes.', 'error');
+    }
+  },
+
+  enterAccount() {
+    const key = Admin.currentEditKey;
+    if (!key) return;
+    // Opens the main app in impersonation mode for this user.
+    // The main app reads "impersonateUid" from localStorage on load.
+    localStorage.setItem('impersonateUid', key);
+    window.open('index.html', '_blank');
+  },
+
+  /* ---------------- TRANSACTIONS ---------------- */
+  switchTxTab(tab) {
+    Admin.txTab = tab;
+    document.getElementById('ttab-pending').classList.toggle('active', tab === 'pending');
+    document.getElementById('ttab-completed').classList.toggle('active', tab === 'completed');
+    Admin.renderTxList();
+  },
+
+  renderTxList() {
+    const list = document.getElementById('tx-list');
+    if (!list) return;
+    const all = Object.entries(Admin.withdrawalsCache || {}).map(([id, w]) => ({ id, ...w }));
+    const pending = all.filter(w => (w.status || 'pending') === 'pending');
+    const completed = all.filter(w => (w.status || 'pending') === 'completed');
+
+    document.getElementById('tcount-pending').innerText = pending.length;
+    document.getElementById('tcount-completed').innerText = completed.length;
+
+    const source = (Admin.txTab === 'pending' ? pending : completed).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No transactions here.</div>'; return; }
+
+    list.innerHTML = source.map(w => {
+      const amt = Admin.fmt(w.netAmount || w.amount || 0);
+      const when = w.timestamp ? new Date(w.timestamp).toLocaleString() : '—';
+      const approveBtn = (Admin.txTab === 'pending')
+        ? `<button class="btn-primary" style="padding:9px;font-size:11px;" onclick="event.stopPropagation();Admin.approveTx('${w.id}','${w.userKey || ''}')">Approve</button>`
+        : '';
+      return `
+        <div class="row-card" style="cursor:default;">
+          <div class="row-top">
+            <span class="row-id">${w.userPhone || w.userKey || '—'}</span>
+            <span class="row-tag">${amt}</span>
+          </div>
+          <span class="row-sub">${w.cryptoAddress || ''}</span>
+          <span class="row-sub">${when}</span>
+          ${approveBtn ? `<div class="save-row" style="margin-top:4px;">${approveBtn}</div>` : ''}
+        </div>`;
+    }).join('');
+  },
+
+  async approveTx(id, userKey) {
+    try {
+      await db.ref('withdrawals/' + id).update({ status: 'completed' });
+      if (userKey) await db.ref('users/' + userKey + '/withdrawals/' + id).update({ status: 'completed' });
+      Admin.toast('Transaction approved.', 'success');
+    } catch (e) {
+      Admin.toast('Could not approve transaction.', 'error');
+    }
+  },
+
+  /* ---------------- CHAT SUPPORT ---------------- */
+  switchChatTab(tab) {
+    Admin.chatTab = tab;
+    document.getElementById('ctab-unread').classList.toggle('active', tab === 'unread');
+    document.getElementById('ctab-read').classList.toggle('active', tab === 'read');
+    Admin.renderChatList();
+  },
+
+  renderChatList() {
+    const list = document.getElementById('chat-list');
+    if (!list) return;
+    const all = Object.entries(Admin.chatsCache || {}).map(([uid, c]) => ({ uid, ...c }));
+    const unread = all.filter(c => (c.lastTime || 0) > (c.adminRead || 0));
+    const read = all.filter(c => (c.lastTime || 0) <= (c.adminRead || 0));
+
+    document.getElementById('ccount-unread').innerText = unread.length;
+    document.getElementById('ccount-read').innerText = read.length;
+
+    const source = (Admin.chatTab === 'unread' ? unread : read).sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No chats here.</div>'; return; }
+
+    list.innerHTML = source.map(c => {
+      const preview = (c.lastMessage || '').substring(0, 50);
+      return `
+        <div class="row-card" onclick="Admin.openChatThread('${c.uid}')">
+          <div class="row-top">
+            <span class="row-id">ID: ${c.myCode || c.uid}</span>
+            <span class="row-sub">${c.lastTime ? new Date(c.lastTime).toLocaleString() : ''}</span>
+          </div>
+          <span class="row-sub">"${preview}${(c.lastMessage || '').length > 50 ? '...' : ''}"</span>
+        </div>`;
+    }).join('');
+  },
+
+  openChatThread(uid) {
+    Admin.currentChatUid = uid;
+    const c = Admin.chatsCache[uid] || {};
+    document.getElementById('ct-title').innerText = 'ID: ' + (c.myCode || uid);
+    Admin.openView('chat-thread');
+    Admin.renderChatMessages(uid);
+    db.ref('support_chats/' + uid).update({ adminRead: Date.now() });
+  },
+
+  renderChatMessages(uid) {
+    const c = Admin.chatsCache[uid] || {};
+    const box = document.getElementById('ct-messages');
+    const msgs = c.messages ? Object.values(c.messages).sort((a, b) => (a.time || 0) - (b.time || 0)) : [];
+    if (msgs.length === 0) { box.innerHTML = '<div class="list-empty">No messages yet.</div>'; return; }
+    box.innerHTML = msgs.map(m => `
+      <div class="msg ${m.from === 'admin' ? 'admin' : 'user'}">
+        ${(m.text || '').replace(/</g, '&lt;')}
+        <span class="ts">${m.time ? new Date(m.time).toLocaleTimeString() : ''}</span>
+      </div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
+  },
+
+  async sendChatReply() {
+    const uid = Admin.currentChatUid;
+    const input = document.getElementById('ct-input');
+    const text = input.value.trim();
+    if (!uid || !text) return;
+    const now = Date.now();
+    try {
+      await db.ref('support_chats/' + uid + '/messages').push({ from: 'admin', text, time: now });
+      await db.ref('support_chats/' + uid).update({ lastMessage: text, lastTime: now, adminRead: now });
+      input.value = '';
+    } catch (e) {
+      Admin.toast('Could not send reply.', 'error');
+    }
+  },
+
+  /* ---------------- DEVICES / SESSION DATA ----------------
+     Reads from "user_sessions/{uid}" — written by the main app
+     (see snippet below) using only client-available data:
+     userAgent-derived OS/browser, screen size, language/timezone
+     (used as an approximate-location proxy), and last-seen timestamp.
+     A real IP address and city normally require a server-side lookup
+     or a geolocation API call, which is outside the scope of this file. */
+  renderDevicesList() {
+    const list = document.getElementById('devices-list');
+    if (!list) return;
+    const q = (document.getElementById('devices-search').value || '').toLowerCase().trim();
+    let entries = Object.entries(Admin.sessionsCache || {});
+    if (q) {
+      entries = entries.filter(([uid, s]) => String(s.myCode || uid).toLowerCase().includes(q));
+    }
+    if (entries.length === 0) { list.innerHTML = '<div class="list-empty">No session data recorded yet.</div>'; return; }
+
+    list.innerHTML = entries.map(([uid, s]) => `
+      <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
+        <div class="row-top">
+          <span class="row-id">ID: ${s.myCode || uid}</span>
+          <span class="row-sub">${s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—'}</span>
+        </div>
+        <span class="row-sub">${s.os || 'Unknown OS'} · ${s.browser || ''}</span>
+      </div>
+    `).join('');
+  },
+
+  openDeviceDetail(uid) {
+    const s = Admin.sessionsCache[uid] || {};
+    document.getElementById('dd-title').innerText = 'ID: ' + (s.myCode || uid);
+    const rows = [
+      { label: 'Last seen', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—' },
+      { label: 'Operating system', value: s.os || '—' },
+      { label: 'Browser', value: s.browser || '—' },
+      { label: 'Approximate timezone', value: s.timezone || '—' },
+      { label: 'Browser language', value: s.language || '—' },
+      { label: 'Screen size', value: s.screen || '—' },
+      { label: 'IP address', value: s.ip || 'Not available (requires server-side lookup)' },
+      { label: 'Approximate city', value: s.city || 'Not available (requires server-side lookup)' }
+    ];
+    document.getElementById('dd-fields').innerHTML = rows.map(r => `
+      <div class="field-block">
+        <span class="f-label">${r.label}</span>
+        <div class="field-row"><input type="text" value="${String(r.value).replace(/"/g, '&quot;')}" disabled></div>
+      </div>
+    `).join('');
+    Admin.openView('device-detail');
+  },
+
+  /* ---------------- PACKAGE QUANTITY ---------------- */
+  populatePkgSelect() {
+    const sel = document.getElementById('edit-pkg-select');
+    sel.innerHTML = Admin.packagesList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    sel.onchange = Admin.loadPkgQty;
+    Admin.loadPkgQty();
+  },
+
+  async loadPkgQty() {
+    const id = document.getElementById('edit-pkg-select').value;
+    try {
+      const snap = await db.ref('package_stock/' + id).get();
+      document.getElementById('edit-pkg-qty').value = snap.exists() ? snap.val() : '';
+    } catch (e) { /* ignore */ }
+  },
+
+  async savePkgQty() {
+    const id = document.getElementById('edit-pkg-select').value;
+    const qty = parseInt(document.getElementById('edit-pkg-qty').value, 10);
+    if (isNaN(qty) || qty < 0) return Admin.toast('Enter a valid quantity.', 'error');
+    try {
+      await db.ref('package_stock/' + id).set(qty);
+      Admin.toast('Package quantity updated.', 'success');
+    } catch (e) {
+      Admin.toast('Could not update quantity.', 'error');
+    }
+  },
+
+  /* ---------------- GLOBAL BROADCAST ---------------- */
+  async sendBroadcast() {
+    const text = document.getElementById('broadcast-text').value.trim();
+    if (!text) return Admin.toast('Write a message first.', 'error');
+    try {
+      await db.ref('settings/broadcast').set({ text, time: Date.now() });
+      document.getElementById('broadcast-text').value = '';
+      Admin.toast('Broadcast sent to all users.', 'success');
+    } catch (e) {
+      Admin.toast('Could not send broadcast.', 'error');
+    }
+  },
+
+  /* ---------------- TOGGLES (promo / legendary / lock) ---------------- */
+  async toggleSetting(settingKey, btnId) {
+    try {
+      const snap = await db.ref('settings/' + settingKey).get();
+      const newVal = !(snap.exists() && snap.val() === true);
+      await db.ref('settings/' + settingKey).set(newVal);
+      Admin.setToggleVisual(btnId, newVal);
+      Admin.toast(newVal ? 'Enabled.' : 'Disabled.', 'success');
+    } catch (e) {
+      Admin.toast('Could not update setting.', 'error');
+    }
+  },
+
+  /* ---------------- WIPE DATABASE ---------------- */
+  openWipeModal() {
+    document.getElementById('wipe-phrase').value = '';
+    document.getElementById('wipe-modal').classList.add('show');
+  },
+  closeWipeModal() {
+    document.getElementById('wipe-modal').classList.remove('show');
+  },
+
+  async confirmWipe() {
+    const phrase = document.getElementById('wipe-phrase').value.trim();
+    if (!phrase) return Admin.toast('Enter the confirmation phrase.', 'error');
+    let hash;
+    try { hash = await sha256(phrase); }
+    catch (e) { return Admin.toast('Hashing not supported in this browser.', 'error'); }
+
+    try {
+      const snap = await db.ref('admin_config/wipePhraseHash').get();
+      if (!snap.exists()) {
+        Admin.toast('Wipe phrase is not configured in the database.', 'error');
+        return;
+      }
+      if (snap.val() !== hash) {
+        Admin.toast('Incorrect confirmation phrase.', 'error');
+        return;
+      }
+      await db.ref('/').set(null);
+      Admin.closeWipeModal();
+      Admin.toast('Database wiped.', 'success');
+    } catch (e) {
+      Admin.toast('Could not wipe the database.', 'error');
+    }
+  }
+};
+
+document.getElementById('gate-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') Admin.tryLogin();
+});
+
+Admin.checkExistingSession();
+</script>
+</body>
+</html>
+
