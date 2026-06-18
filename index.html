@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚡️ Solar Power — Admin</title>
+<title>⚡️ Solar Power — Админ</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -47,12 +47,11 @@ body{
   gap:18px; text-align:center; padding:30px 10px;
 }
 #gate .lock-icon{font-size:42px;color:var(--gold-bright);}
-#gate h1{font-size:20px;font-weight:900;letter-spacing:0.5px;}
 #gate input{
   width:100%;max-width:320px;background:rgba(255,255,255,0.06);
   border:1px solid var(--gold);border-radius:var(--radius-sm);
   padding:14px;color:#fff;font-size:16px;font-weight:700;text-align:center;outline:none;
-  letter-spacing:2px;
+  letter-spacing:6px;
 }
 #gate input::placeholder{color:#8ea0c2;letter-spacing:0;font-weight:500;}
 #gate button{
@@ -60,8 +59,34 @@ body{
   border:1px solid var(--gold-bright);background:var(--card-bg);color:#fff;
   font-weight:800;font-size:14px;letter-spacing:1px;cursor:pointer;
 }
+#gate button:disabled{opacity:0.5;cursor:not-allowed;}
 #gate .err{color:var(--red-off-bright);font-size:12px;font-weight:700;min-height:16px;}
 #gate .setup-note{font-size:11px;color:#8ea0c2;max-width:340px;line-height:1.5;}
+#gate .lockout-note{color:var(--red-off-bright);font-size:13px;font-weight:800;max-width:340px;line-height:1.5;}
+
+/* ---------- INTRUSION ALERT (red full-screen warning) ---------- */
+.intrusion-overlay{
+  display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(60,0,0,0.92);
+  align-items:center;justify-content:center;padding:24px;text-align:center;
+  animation:intrusionPulse 1s infinite alternate;
+}
+.intrusion-overlay.show{display:flex;}
+@keyframes intrusionPulse{
+  from{background:rgba(70,0,0,0.92);}
+  to{background:rgba(120,0,0,0.95);}
+}
+.intrusion-box{
+  max-width:380px;display:flex;flex-direction:column;gap:16px;align-items:center;
+}
+.intrusion-box i{font-size:54px;color:#ff3b4e;}
+.intrusion-box h2{font-size:20px;font-weight:900;color:#fff;letter-spacing:0.5px;}
+.intrusion-box p{font-size:14px;color:#ffd0d4;line-height:1.5;font-weight:600;}
+.intrusion-box .timer{font-size:28px;font-weight:900;color:#fff;}
+.intrusion-box button{
+  margin-top:6px;padding:12px 22px;border-radius:10px;border:1px solid #fff;
+  background:transparent;color:#fff;font-weight:800;font-size:13px;cursor:pointer;
+}
 
 /* ---------- TOP NAV (4 square buttons) ---------- */
 #admin-root{display:none;flex-direction:column;gap:14px;}
@@ -114,7 +139,7 @@ body{
 .section-title{font-size:13px;font-weight:900;letter-spacing:0.5px;color:#fff;display:flex;align-items:center;gap:8px;}
 .section-title i{color:var(--gold-bright);}
 
-/* ---------- toggle squares row (4) ---------- */
+/* ---------- toggle squares row ---------- */
 .toggle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .toggle-sq{
   aspect-ratio:1/1;border-radius:var(--radius-md);
@@ -130,6 +155,9 @@ body{
 .toggle-sq.on i{color:var(--green-on-bright);}
 .toggle-sq.danger{background:#3a0a10;border-color:var(--red-off-bright);}
 .toggle-sq.danger i{color:var(--red-off-bright);}
+/* Wipe button is now icon-only */
+.toggle-sq.icon-only span{display:none;}
+.toggle-sq.icon-only i{font-size:26px;}
 
 /* ---------- views (full screen sections) ---------- */
 .view{display:none;flex-direction:column;gap:12px;}
@@ -153,8 +181,9 @@ body{
 }
 .search-bar input::placeholder{color:#8ea0c2;font-weight:500;}
 
-/* tab pair (e.g. Premium/Regular, approved/unapproved, read/unread) */
+/* tab pair */
 .tab-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .tab-btn{
   padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--gold);
   background:rgba(255,255,255,0.04);color:#fff;font-weight:800;font-size:12.5px;
@@ -176,6 +205,21 @@ body{
 .row-card .row-tag{
   font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:999px;border:1px solid var(--gold-bright);
   color:var(--gold-bright);
+}
+
+/* BIG ID card (Users + Data lists) */
+.id-card{
+  background:rgba(255,255,255,0.05);border:1.5px solid var(--gold);border-radius:14px;
+  padding:18px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
+  transition:border-color .15s ease, transform .12s ease;
+}
+.id-card:active{transform:scale(0.98);}
+.id-card .id-big{font-weight:900;font-size:20px;color:#fff;letter-spacing:0.5px;}
+.id-card .id-online{color:#1ecb6b;margin-right:6px;}
+.id-card .del-btn{
+  width:42px;height:42px;border-radius:10px;border:1px solid var(--red-off-bright);
+  background:rgba(255,59,78,0.12);color:#ff8a96;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
 }
 
 /* user profile editor */
@@ -205,6 +249,14 @@ body{
   background:rgba(255,59,78,0.12);color:#ff8a96;font-weight:800;font-size:13px;cursor:pointer;
 }
 
+/* profile stat block (read-only highlighted) */
+.stat-block{
+  background:rgba(255,255,255,0.05);border:1px solid var(--gold);border-radius:10px;
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;
+}
+.stat-block .s-label{font-size:11.5px;color:var(--text-dim);font-weight:700;}
+.stat-block .s-value{font-size:14px;color:#fff;font-weight:900;}
+
 /* chat thread */
 .chat-thread{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding:8px;}
 .msg{max-width:78%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.35;}
@@ -231,7 +283,7 @@ body{
 #toast.error{border-color:var(--red-off-bright);}
 #toast.success{border-color:var(--green-on-bright);}
 
-/* modal (phrase confirm) */
+/* modal */
 .modal-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:998;
   align-items:center;justify-content:center;padding:20px;
@@ -241,12 +293,17 @@ body{
   background:var(--card-bg);border:1.5px solid var(--red-off-bright);border-radius:var(--radius-md);
   padding:20px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;
 }
+.modal-box.neutral{border-color:var(--gold-bright);}
 .modal-box h3{font-size:15px;font-weight:900;color:#ff8a96;}
+.modal-box.neutral h3{color:var(--gold-bright);}
 .modal-box p{font-size:12px;color:var(--text-dim);line-height:1.5;}
 .modal-box input{
   background:rgba(255,255,255,0.06);border:1px solid var(--red-off-bright);border-radius:8px;
-  padding:12px;color:#fff;font-size:13px;outline:none;
+  padding:12px;color:#fff;font-size:13px;outline:none;letter-spacing:4px;text-align:center;
 }
+.modal-box.neutral input{border-color:var(--gold-bright);}
+.modal-choice-row{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+.modal-choice-row button{width:100%;}
 
 .small-note{font-size:10.5px;color:#8ea0c2;text-align:center;}
 </style>
@@ -254,83 +311,91 @@ body{
 <body>
 <div id="app">
 
+  <!-- ============ INTRUSION ALERT ============ -->
+  <div class="intrusion-overlay" id="intrusion-overlay">
+    <div class="intrusion-box">
+      <i class="fas fa-triangle-exclamation"></i>
+      <h2>ОПИТ ЗА НЕОТОРИЗИРАН ДОСТЪП</h2>
+      <p>Някой се опитва да влезе в базата данни с грешна парола. Достъпът е заключен временно.</p>
+      <div class="timer" id="intrusion-timer">20:00</div>
+      <button onclick="Admin.dismissIntrusion()">Разбрах</button>
+    </div>
+  </div>
+
   <!-- ============ LOGIN GATE ============ -->
   <div id="gate">
     <i class="fas fa-lock lock-icon"></i>
-    <h1>SOLAR POWER — ADMIN ACCESS</h1>
-    <input type="password" id="gate-pass" placeholder="Admin password" autocomplete="off">
-    <button onclick="Admin.tryLogin()">UNLOCK</button>
+    <input type="password" id="gate-pass" placeholder="Парола за достъп" autocomplete="off"
+           inputmode="numeric" pattern="[0-9]*">
+    <button id="gate-unlock-btn" onclick="Admin.tryLogin()">ОТКЛЮЧИ</button>
     <div class="err" id="gate-err"></div>
+    <div class="lockout-note" id="gate-lockout-note"></div>
     <div class="setup-note" id="gate-setup-note"></div>
   </div>
 
   <!-- ============ ADMIN ROOT ============ -->
   <div id="admin-root">
 
-    <!-- HOME (nav + admin info + toggles) -->
+    <!-- HOME -->
     <div class="view active" id="view-home">
 
       <div class="top-nav">
         <div class="nav-sq" onclick="Admin.openView('users')">
-          <i class="fas fa-user"></i><span>Users</span>
+          <i class="fas fa-user"></i><span>Потребители</span>
         </div>
         <div class="nav-sq" onclick="Admin.openView('transactions')">
-          <i class="fas fa-money-bill-transfer"></i><span>Transactions</span>
+          <i class="fas fa-money-bill-transfer"></i><span>Транзакции</span>
           <div class="badge" id="badge-tx" style="display:none;"></div>
         </div>
         <div class="nav-sq" onclick="Admin.openView('chat')">
-          <i class="fas fa-comments"></i><span>Chat Support</span>
+          <i class="fas fa-comments"></i><span>Поддръжка</span>
           <div class="badge" id="badge-chat" style="display:none;"></div>
         </div>
         <div class="nav-sq" onclick="Admin.openView('devices')">
-          <i class="fas fa-network-wired"></i><span>Data</span>
+          <i class="fas fa-network-wired"></i><span>Данни</span>
         </div>
       </div>
 
       <div class="admin-info-btn" onclick="Admin.toggleInfoPanel()">
-        <i class="fas fa-chart-line"></i> &nbsp;ADMIN INFO
+        <i class="fas fa-chart-line"></i> &nbsp;АДМИН ИНФО
       </div>
       <div class="admin-info-panel" id="admin-info-panel">
-        <div class="admin-info-row"><span class="lbl">Total invested (active packages)</span><span class="val" id="info-invested">—</span></div>
-        <div class="admin-info-row"><span class="lbl">Total withdrawn</span><span class="val" id="info-withdrawn">—</span></div>
-        <div class="admin-info-row"><span class="lbl">Pending withdrawals</span><span class="val" id="info-pending">—</span></div>
-        <div class="admin-info-row"><span class="lbl">Total user balance (combined)</span><span class="val" id="info-balance">—</span></div>
-        <div class="admin-info-row"><span class="lbl">New users (last 24h)</span><span class="val" id="info-new24h">—</span></div>
-        <div class="admin-info-row"><span class="lbl">Total users in database</span><span class="val" id="info-totalusers">—</span></div>
-      </div>
-
-      <div class="admin-info-btn" onclick="Admin.openView('devices')" style="margin-top:10px;">
-        <i class="fas fa-circle-info"></i> &nbsp;Повече информация
+        <div class="admin-info-row"><span class="lbl">Общо инвестирано (активни пакети)</span><span class="val" id="info-invested">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Общо изтеглено</span><span class="val" id="info-withdrawn">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Чакащи тегления</span><span class="val" id="info-pending">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Общ баланс на потребителите</span><span class="val" id="info-balance">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Нови потребители (24ч)</span><span class="val" id="info-new24h">—</span></div>
+        <div class="admin-info-row"><span class="lbl">Общо потребители в базата</span><span class="val" id="info-totalusers">—</span></div>
       </div>
 
       <div class="section-card">
-        <div class="section-title"><i class="fas fa-solar-panel"></i> Activate Investment Package</div>
-        <input type="text" id="activate-user-id" placeholder="User ID" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;">
+        <div class="section-title"><i class="fas fa-solar-panel"></i> Активиране на инвестиционен пакет</div>
+        <input type="text" id="activate-user-id" placeholder="ID на потребител" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;">
         <select id="activate-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;"></select>
-        <button class="btn-primary" onclick="Admin.activatePackageForUser()">Activate package</button>
+        <button class="btn-primary" onclick="Admin.activatePackageForUser()">Активирай пакета</button>
       </div>
 
       <div class="section-card">
-        <div class="section-title"><i class="fas fa-layer-group"></i> Edit Package Quantity</div>
+        <div class="section-title"><i class="fas fa-layer-group"></i> Редакция на количество пакети</div>
         <select id="edit-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;"></select>
         <div class="field-row">
-          <input type="number" id="edit-pkg-qty" placeholder="Remaining quantity">
+          <input type="number" id="edit-pkg-qty" placeholder="Оставащо количество">
           <button class="pencil-btn" onclick="Admin.savePkgQty()"><i class="fas fa-check"></i></button>
         </div>
       </div>
 
       <div class="toggle-grid">
         <div class="toggle-sq" id="tgl-promo" onclick="Admin.toggleSetting('isPromoActive','tgl-promo')">
-          <i class="fas fa-clock"></i><span>Start 24h Promo</span>
+          <i class="fas fa-clock"></i><span>Старт 24ч промо</span>
         </div>
         <div class="toggle-sq" id="tgl-legendary" onclick="Admin.toggleSetting('solarInfinityEnabled','tgl-legendary')">
-          <i class="fas fa-star"></i><span>Enable Solar Legendary</span>
+          <i class="fas fa-star"></i><span>Solar Legendary</span>
         </div>
         <div class="toggle-sq" id="tgl-lock" onclick="Admin.toggleSetting('withdrawalsFrozen','tgl-lock')">
-          <i class="fas fa-lock"></i><span>Enable Lock Mode</span>
+          <i class="fas fa-lock"></i><span>Заключи теглене</span>
         </div>
-        <div class="toggle-sq danger" id="tgl-wipe" onclick="Admin.openWipeModal()">
-          <i class="fas fa-radiation"></i><span>Wipe Database</span>
+        <div class="toggle-sq danger icon-only" id="tgl-wipe" onclick="Admin.openWipeGate()">
+          <i class="fas fa-radiation"></i><span>Wipe</span>
         </div>
       </div>
 
@@ -340,33 +405,33 @@ body{
     <div class="view" id="view-users">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
-        <h2>Users</h2>
+        <h2>Потребители</h2>
       </div>
       <div class="search-bar">
         <i class="fas fa-magnifying-glass"></i>
-        <input type="text" id="users-search" placeholder="Search by ID, phone or name..." oninput="Admin.renderUsersList()">
+        <input type="text" id="users-search" placeholder="Търси по ID, телефон или име..." oninput="Admin.renderUsersList()">
       </div>
       <div class="tab-pair">
         <div class="tab-btn active" id="utab-premium" onclick="Admin.switchUsersTab('premium')">
-          <span>Premium</span><span class="count" id="ucount-premium">0</span>
+          <span>Премиум</span><span class="count" id="ucount-premium">0</span>
         </div>
         <div class="tab-btn" id="utab-regular" onclick="Admin.switchUsersTab('regular')">
-          <span>Regular</span><span class="count" id="ucount-regular">0</span>
+          <span>Обикновени</span><span class="count" id="ucount-regular">0</span>
         </div>
       </div>
-      <div class="list-wrap" id="users-list"><div class="list-empty">Loading...</div></div>
+      <div class="list-wrap" id="users-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
     <!-- ============ USER PROFILE EDITOR ============ -->
     <div class="view" id="view-user-edit">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('users')"><i class="fas fa-arrow-left"></i></div>
-        <h2 id="ue-title">User</h2>
+        <h2 id="ue-title">Потребител</h2>
       </div>
-      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> View As User</button>
+      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> Преглед на акаунта</button>
       <div id="ue-fields" style="display:flex;flex-direction:column;gap:12px;"></div>
       <div class="save-row">
-        <button class="btn-primary" onclick="Admin.saveUserEdits()">Save changes</button>
+        <button class="btn-primary" onclick="Admin.saveUserEdits()">Запази промените</button>
       </div>
     </div>
 
@@ -374,45 +439,45 @@ body{
     <div class="view" id="view-transactions">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
-        <h2>Transactions</h2>
+        <h2>Транзакции</h2>
       </div>
       <div class="tab-pair">
         <div class="tab-btn active" id="ttab-pending" onclick="Admin.switchTxTab('pending')">
-          <span>Unapproved</span><span class="count" id="tcount-pending">0</span>
+          <span>Неодобрени</span><span class="count" id="tcount-pending">0</span>
         </div>
         <div class="tab-btn" id="ttab-completed" onclick="Admin.switchTxTab('completed')">
-          <span>Approved</span><span class="count" id="tcount-completed">0</span>
+          <span>Одобрени</span><span class="count" id="tcount-completed">0</span>
         </div>
       </div>
-      <div class="list-wrap" id="tx-list"><div class="list-empty">Loading...</div></div>
+      <div class="list-wrap" id="tx-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
     <!-- ============ CHAT SUPPORT VIEW ============ -->
     <div class="view" id="view-chat">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
-        <h2>Chat Support</h2>
+        <h2>Поддръжка</h2>
       </div>
       <div class="tab-pair">
         <div class="tab-btn active" id="ctab-unread" onclick="Admin.switchChatTab('unread')">
-          <span>Unread</span><span class="count" id="ccount-unread">0</span>
+          <span>Непрочетени</span><span class="count" id="ccount-unread">0</span>
         </div>
         <div class="tab-btn" id="ctab-read" onclick="Admin.switchChatTab('read')">
-          <span>Read</span><span class="count" id="ccount-read">0</span>
+          <span>Прочетени</span><span class="count" id="ccount-read">0</span>
         </div>
       </div>
-      <div class="list-wrap" id="chat-list"><div class="list-empty">Loading...</div></div>
+      <div class="list-wrap" id="chat-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
     <!-- ============ CHAT THREAD VIEW ============ -->
     <div class="view" id="view-chat-thread">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('chat')"><i class="fas fa-arrow-left"></i></div>
-        <h2 id="ct-title">Chat</h2>
+        <h2 id="ct-title">Чат</h2>
       </div>
       <div class="chat-thread" id="ct-messages"></div>
       <div class="chat-input-row">
-        <input type="text" id="ct-input" placeholder="Type a reply...">
+        <input type="text" id="ct-input" placeholder="Напиши отговор...">
         <button class="send-btn" onclick="Admin.sendChatReply()"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>
@@ -421,28 +486,28 @@ body{
     <div class="view" id="view-devices">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
-        <h2>Повече информация</h2>
+        <h2>Данни</h2>
       </div>
       <div class="tabs">
         <div class="tab-btn active" id="dtab-active" onclick="Admin.switchDevicesTab('active')">
           <span>Активни</span><span class="count" id="dcount-active">0</span>
         </div>
         <div class="tab-btn" id="dtab-all" onclick="Admin.switchDevicesTab('all')">
-          <span>Повече информация</span><span class="count" id="dcount-all">0</span>
+          <span>Всички</span><span class="count" id="dcount-all">0</span>
         </div>
       </div>
       <div class="search-bar">
         <i class="fas fa-magnifying-glass"></i>
-        <input type="text" id="devices-search" placeholder="Search by user ID..." oninput="Admin.renderDevicesList()">
+        <input type="text" id="devices-search" placeholder="Търси по ID..." oninput="Admin.renderDevicesList()">
       </div>
-      <div class="list-wrap" id="devices-list"><div class="list-empty">Loading...</div></div>
+      <div class="list-wrap" id="devices-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
     <!-- ============ DEVICE DETAIL VIEW ============ -->
     <div class="view" id="view-device-detail">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('devices')"><i class="fas fa-arrow-left"></i></div>
-        <h2 id="dd-title">Session data</h2>
+        <h2 id="dd-title">Данни за сесия</h2>
       </div>
       <div id="dd-fields" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
@@ -452,15 +517,41 @@ body{
 
 <div id="toast"></div>
 
-<!-- WIPE CONFIRM MODAL -->
+<!-- WIPE GATE MODAL (asks admin password first) -->
+<div class="modal-overlay" id="wipe-gate-modal">
+  <div class="modal-box neutral">
+    <h3><i class="fas fa-key"></i> Потвърди самоличност</h3>
+    <p>Въведи паролата за админ панела, за да продължиш.</p>
+    <input type="password" id="wipe-gate-pass" placeholder="Парола за админ панела" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+    <div class="save-row">
+      <button class="btn-secondary" onclick="Admin.closeWipeGate()">Отказ</button>
+      <button class="btn-primary" onclick="Admin.confirmWipeGate()">Продължи</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIPE CHOICE MODAL (export / delete) -->
+<div class="modal-overlay" id="wipe-choice-modal">
+  <div class="modal-box neutral">
+    <h3><i class="fas fa-database"></i> Управление на базата данни</h3>
+    <p>Избери действие. Извличането сваля CSV файл с всички данни. Пълното изтриване иска отделна парола за изтриване.</p>
+    <div class="modal-choice-row">
+      <button class="btn-primary" onclick="Admin.exportAllData()"><i class="fas fa-file-arrow-down"></i> &nbsp;Извличане на всичко (CSV)</button>
+      <button class="btn-danger" onclick="Admin.openWipeConfirm()"><i class="fas fa-radiation"></i> &nbsp;Пълно изтриване на базата</button>
+      <button class="btn-secondary" onclick="Admin.closeWipeChoice()">Затвори</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIPE CONFIRM MODAL (delete phrase) -->
 <div class="modal-overlay" id="wipe-modal">
   <div class="modal-box">
-    <h3><i class="fas fa-triangle-exclamation"></i> Wipe entire database</h3>
-    <p>This permanently deletes every user, transaction, chat and setting. There is no undo. Type the confirmation phrase to proceed.</p>
-    <input type="password" id="wipe-phrase" placeholder="Confirmation phrase" autocomplete="off">
+    <h3><i class="fas fa-triangle-exclamation"></i> Изтриване на цялата база</h3>
+    <p>Това изтрива завинаги всеки потребител, транзакция, чат и настройка. Няма връщане назад. Въведи паролата за изтриване, за да продължиш.</p>
+    <input type="password" id="wipe-phrase" placeholder="Парола за изтриване" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
     <div class="save-row">
-      <button class="btn-secondary" onclick="Admin.closeWipeModal()">Cancel</button>
-      <button class="btn-danger" onclick="Admin.confirmWipe()">Delete everything</button>
+      <button class="btn-secondary" onclick="Admin.closeWipeModal()">Отказ</button>
+      <button class="btn-danger" onclick="Admin.confirmWipe()">Изтрий всичко</button>
     </div>
   </div>
 </div>
@@ -483,9 +574,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* =========================================================================
-   SHA-256 helper (Web Crypto) — used so the admin password / wipe phrase
-   are never stored as plain text in this file. Only their hash is compared
-   against a hash stored in the database under admin_config/.
+   SHA-256 helper (Web Crypto) — admin password / wipe phrase are never
+   stored as plain text in this file; only their hash is compared against
+   a hash stored in the database under admin_config/.
    ========================================================================= */
 async function sha256(text) {
   const enc = new TextEncoder().encode(text);
@@ -501,6 +592,10 @@ const Admin = {
   withdrawalsCache: {},
   chatsCache: {},
   sessionsCache: {},
+  serverTimeOffset: 0,
+  serverTimeReady: false,
+  infoTimer: null,
+  lockoutTimer: null,
   packagesList: [
     { id: 'solar_start', name: 'Solar Start' },
     { id: 'sun_basic', name: 'Sun Basic' },
@@ -537,39 +632,192 @@ const Admin = {
     solar_power_infinity:{ name: 'Solar Legendary', price: 20000, daily: 1700 }
   },
 
-  /* ---------------- LOGIN ---------------- */
+  /* ---------------- SERVER TIME (immune to device clock) ----------------
+     Locks onto Firebase .info/serverTimeOffset so all lockout timing is
+     based on authoritative server time, not the device clock/date. */
+  initServerTime() {
+    try {
+      const offRef = db.ref('.info/serverTimeOffset');
+      offRef.on('value', snap => {
+        const off = snap.val();
+        if (typeof off === 'number' && isFinite(off)) {
+          Admin.serverTimeOffset = off;
+          Admin.serverTimeReady = true;
+        }
+      });
+    } catch (e) { /* ignore */ }
+  },
+
+  serverNow() {
+    return Date.now() + (Admin.serverTimeOffset || 0);
+  },
+
+  /* ---------------- LOGIN with lockout ----------------
+     After 3 wrong passwords the gate locks for 20 minutes. The lock end
+     time is stored on the SERVER (admin_security/lockUntil) as a server
+     timestamp, so changing the device clock/date cannot bypass it. An
+     intrusion flag is written so the legitimate admin sees a red alert. */
   async tryLogin() {
-    const pass = document.getElementById('gate-pass').value.trim();
+    const passEl = document.getElementById('gate-pass');
+    const pass = passEl.value.trim();
     const errEl = document.getElementById('gate-err');
+    const btn = document.getElementById('gate-unlock-btn');
     errEl.innerText = '';
-    if (!pass) { errEl.innerText = 'Enter the admin password.'; return; }
+
+    // Block immediately if currently locked out (server-time based)
+    const locked = await Admin.getLockRemainingMs();
+    if (locked > 0) {
+      Admin.showLockout(locked);
+      return;
+    }
+
+    if (!pass) { errEl.innerText = 'Въведи паролата.'; return; }
+
+    btn.disabled = true;
+    btn.innerText = 'Проверка...';
 
     let hash;
     try { hash = await sha256(pass); }
-    catch (e) { errEl.innerText = 'Your browser does not support secure hashing.'; return; }
+    catch (e) {
+      errEl.innerText = 'Браузърът не поддържа защитено криптиране.';
+      btn.disabled = false; btn.innerText = 'ОТКЛЮЧИ';
+      return;
+    }
 
     try {
       const snap = await db.ref('admin_config/passwordHash').get();
       if (!snap.exists()) {
-        // First-time setup: no hash stored yet in the database.
         document.getElementById('gate-setup-note').innerHTML =
-          'No admin password is configured in the database yet. Run the setup script ' +
-          '(see admin_setup.html) once to store the password hash under <b>admin_config/passwordHash</b>, ' +
-          'then reload this page.';
-        errEl.innerText = 'Admin access is not configured yet.';
+          'Все още няма зададена админ парола в базата. Стартирай setup скрипта веднъж, ' +
+          'за да запишеш хеша на паролата под <b>admin_config/passwordHash</b>, после презареди.';
+        errEl.innerText = 'Админ достъпът все още не е конфигуриран.';
+        btn.disabled = false; btn.innerText = 'ОТКЛЮЧИ';
         return;
       }
       if (snap.val() === hash) {
+        await Admin.resetFailedAttempts();
         sessionStorage.setItem('adminUnlocked', '1');
         document.getElementById('gate').style.display = 'none';
         document.getElementById('admin-root').style.display = 'flex';
         Admin.boot();
       } else {
-        errEl.innerText = 'Incorrect password.';
+        const remaining = await Admin.registerFailedAttempt();
+        passEl.value = '';
+        if (remaining > 0) {
+          errEl.innerText = 'Грешна парола. Оставащи опити: ' + remaining + '.';
+          btn.disabled = false; btn.innerText = 'ОТКЛЮЧИ';
+        } else {
+          // Just hit the limit -> locked
+          const ms = await Admin.getLockRemainingMs();
+          Admin.showLockout(ms);
+        }
       }
     } catch (e) {
-      errEl.innerText = 'Could not reach the database. Check your connection.';
+      errEl.innerText = 'Няма връзка с базата данни. Провери интернета.';
+      btn.disabled = false; btn.innerText = 'ОТКЛЮЧИ';
     }
+  },
+
+  /* Records a failed attempt on the server. Returns remaining attempts (0 = now locked). */
+  async registerFailedAttempt() {
+    const MAX = 3;
+    const LOCK_MS = 20 * 60 * 1000;
+    try {
+      const ref = db.ref('admin_security');
+      const snap = await ref.get();
+      const data = snap.exists() ? snap.val() : {};
+      let fails = (data.failedAttempts || 0) + 1;
+      const updates = { failedAttempts: fails, lastFailServer: firebase.database.ServerValue.TIMESTAMP };
+      if (fails >= MAX) {
+        // Lock end = server time + 20 min, written via server timestamp + offset write
+        updates.lockUntil = Admin.serverNow() + LOCK_MS;
+        updates.intrusion = true;
+        updates.intrusionServer = firebase.database.ServerValue.TIMESTAMP;
+        await ref.update(updates);
+        return 0;
+      }
+      await ref.update(updates);
+      return MAX - fails;
+    } catch (e) {
+      return 1;
+    }
+  },
+
+  async resetFailedAttempts() {
+    try {
+      await db.ref('admin_security').update({
+        failedAttempts: 0,
+        lockUntil: 0,
+        intrusion: false
+      });
+    } catch (e) { /* ignore */ }
+  },
+
+  /* Returns remaining lockout time in ms (0 if not locked), using SERVER time. */
+  async getLockRemainingMs() {
+    try {
+      const snap = await db.ref('admin_security/lockUntil').get();
+      if (!snap.exists()) return 0;
+      const lockUntil = parseFloat(snap.val()) || 0;
+      const remaining = lockUntil - Admin.serverNow();
+      return remaining > 0 ? remaining : 0;
+    } catch (e) { return 0; }
+  },
+
+  showLockout(ms) {
+    const btn = document.getElementById('gate-unlock-btn');
+    const note = document.getElementById('gate-lockout-note');
+    btn.disabled = true;
+    if (Admin.lockoutTimer) clearInterval(Admin.lockoutTimer);
+    const tick = () => {
+      // Recompute remaining time from server time on every tick.
+      const left = Math.max(0, Math.round((Admin._lockEnd - Admin.serverNow()) / 1000));
+      const mm = String(Math.floor(left / 60)).padStart(2, '0');
+      const ss = String(left % 60).padStart(2, '0');
+      note.innerText = 'Заключено. Опитай отново след ' + mm + ':' + ss;
+      if (left <= 0) {
+        clearInterval(Admin.lockoutTimer);
+        note.innerText = '';
+        btn.disabled = false;
+        btn.innerText = 'ОТКЛЮЧИ';
+        Admin.resetFailedAttempts();
+      }
+    };
+    Admin._lockEnd = Admin.serverNow() + ms;
+    tick();
+    Admin.lockoutTimer = setInterval(tick, 1000);
+  },
+
+  /* Live-watch the intrusion flag so the real admin gets a red alert. */
+  listenIntrusion() {
+    db.ref('admin_security').on('value', snap => {
+      const d = snap.exists() ? snap.val() : {};
+      const remaining = (parseFloat(d.lockUntil || 0)) - Admin.serverNow();
+      if (d.intrusion && remaining > 0) {
+        Admin.showIntrusionAlert(remaining);
+      }
+    });
+  },
+
+  showIntrusionAlert(ms) {
+    const overlay = document.getElementById('intrusion-overlay');
+    const timerEl = document.getElementById('intrusion-timer');
+    overlay.classList.add('show');
+    if (Admin._intrusionTimer) clearInterval(Admin._intrusionTimer);
+    Admin._intrusionEnd = Admin.serverNow() + ms;
+    const tick = () => {
+      const left = Math.max(0, Math.round((Admin._intrusionEnd - Admin.serverNow()) / 1000));
+      const mm = String(Math.floor(left / 60)).padStart(2, '0');
+      const ss = String(left % 60).padStart(2, '0');
+      timerEl.innerText = mm + ':' + ss;
+      if (left <= 0) { clearInterval(Admin._intrusionTimer); }
+    };
+    tick();
+    Admin._intrusionTimer = setInterval(tick, 1000);
+  },
+
+  dismissIntrusion() {
+    document.getElementById('intrusion-overlay').classList.remove('show');
   },
 
   checkExistingSession() {
@@ -577,10 +825,13 @@ const Admin = {
       document.getElementById('gate').style.display = 'none';
       document.getElementById('admin-root').style.display = 'flex';
       Admin.boot();
+    } else {
+      // On the gate: if a lockout is active, reflect it immediately
+      Admin.getLockRemainingMs().then(ms => { if (ms > 0) Admin.showLockout(ms); });
     }
   },
 
-  /* ---------------- BOOT / NAV ---------------- */
+  /* ---------------- BOOT ---------------- */
   boot() {
     Admin.listenUsers();
     Admin.listenWithdrawals();
@@ -589,6 +840,7 @@ const Admin = {
     Admin.listenSettings();
     Admin.populatePkgSelect();
     Admin.populateActivatePackageSelect();
+    Admin.startInfoAutoRefresh();
   },
 
   openView(name) {
@@ -652,6 +904,9 @@ const Admin = {
     db.ref('support_chats').on('value', snap => {
       Admin.chatsCache = snap.exists() ? snap.val() : {};
       Admin.renderChatList();
+      if (Admin.currentChatUid && document.getElementById('view-chat-thread').classList.contains('active')) {
+        Admin.renderChatMessages(Admin.currentChatUid);
+      }
       const unread = Object.values(Admin.chatsCache).filter(c => (c.lastTime || 0) > (c.adminRead || 0)).length;
       Admin.updateBadge('badge-chat', unread);
     });
@@ -687,12 +942,18 @@ const Admin = {
     el.classList.toggle('on', isOn);
   },
 
-  /* ---------------- ADMIN INFO ---------------- */
+  /* ---------------- ADMIN INFO (auto-refresh every second) ---------------- */
+  startInfoAutoRefresh() {
+    if (Admin.infoTimer) clearInterval(Admin.infoTimer);
+    Admin.renderAdminInfo();
+    Admin.infoTimer = setInterval(() => Admin.renderAdminInfo(), 1000);
+  },
+
   renderAdminInfo() {
     const users = Admin.usersCache || {};
     const withdrawals = Admin.withdrawalsCache || {};
     let totalInvested = 0, totalBalance = 0, newUsers24h = 0, totalUsers = 0;
-    const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const dayAgo = Admin.serverNow() - 24 * 60 * 60 * 1000;
 
     Object.values(users).forEach(u => {
       totalUsers++;
@@ -710,12 +971,13 @@ const Admin = {
       else pendingAmount += amt;
     });
 
-    document.getElementById('info-invested').innerText = Admin.fmt(totalInvested);
-    document.getElementById('info-withdrawn').innerText = Admin.fmt(totalWithdrawn);
-    document.getElementById('info-pending').innerText = Admin.fmt(pendingAmount);
-    document.getElementById('info-balance').innerText = Admin.fmt(totalBalance);
-    document.getElementById('info-new24h').innerText = newUsers24h;
-    document.getElementById('info-totalusers').innerText = totalUsers;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    set('info-invested', Admin.fmt(totalInvested));
+    set('info-withdrawn', Admin.fmt(totalWithdrawn));
+    set('info-pending', Admin.fmt(pendingAmount));
+    set('info-balance', Admin.fmt(totalBalance));
+    set('info-new24h', newUsers24h);
+    set('info-totalusers', totalUsers);
   },
 
   /* ---------------- USERS LIST ---------------- */
@@ -747,55 +1009,111 @@ const Admin = {
       );
     }
 
-    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No users found.</div>'; return; }
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">Няма намерени потребители.</div>'; return; }
 
+    // BIG ID cards
     list.innerHTML = source.map(([key, u]) => `
-      <div class="row-card" onclick="Admin.openUserEdit('${key}')">
-        <div class="row-top">
-          <span class="row-id">ID: ${u.myCode || key}</span>
-        </div>
+      <div class="id-card" onclick="Admin.openUserEdit('${key}')">
+        <span class="id-big">${u.myCode || key}</span>
+        <i class="fas fa-chevron-right" style="color:var(--gold-bright);"></i>
       </div>
     `).join('');
   },
 
   /* ---------------- USER EDIT ---------------- */
-  openUserEdit(key) {
-    const u = Admin.usersCache[key];
-    if (!u) return Admin.toast('User not found.', 'error');
-    Admin.currentEditKey = key;
-    document.getElementById('ue-title').innerText = 'ID: ' + (u.myCode || key);
-
+  computeUserStats(u) {
     let totalWithdrawn = 0;
     if (u.withdrawals) {
       Object.values(u.withdrawals).forEach(w => {
         if (w.status === 'completed') totalWithdrawn += parseFloat(w.amount || w.netAmount || 0);
       });
     }
-
-    const fields = [
-      { label: 'Balance', key: 'balance', value: u.balance || 0 },
-      { label: 'Total withdrawn', key: null, value: Admin.fmt(totalWithdrawn) },
-      { label: 'Crypto address', key: 'cryptoAddress', value: u.cryptoAddress || '' },
-      { label: 'Phone number', key: 'phone', value: u.phone || '' },
-      { label: 'Registration date', key: null, value: u.createdAt ? new Date(u.createdAt).toLocaleString() : '—' },
-      { label: 'Password', key: 'password', value: u.password || '' },
-      { label: 'Withdrawal PIN', key: 'withdrawPin', value: u.withdrawPin || '' },
-      { label: 'Invite code used', key: 'invitedBy', value: u.invitedBy || u.referredBy || u.inviteCodeUsed || '' }
-    ];
-
-    document.getElementById('ue-fields').innerHTML = fields.map((f, i) => `
-      <div class="field-block">
-        <span class="f-label">${f.label}</span>
-        <div class="field-row">
-          <input type="text" id="ue-field-${i}" value="${String(f.value).replace(/"/g, '&quot;')}" data-key="${f.key || ''}" ${f.key ? 'disabled' : 'disabled'}>
-          ${f.key ? `<button class="pencil-btn" onclick="Admin.unlockField(${i})"><i class="fas fa-pencil"></i></button>` : ''}
-        </div>
-      </div>
-    `).join('');
+    const available = parseFloat(u.balance || 0);
+    return { totalWithdrawn, available };
   },
 
-  unlockField(i) {
-    const el = document.getElementById('ue-field-' + i);
+  openUserEdit(key) {
+    const u = Admin.usersCache[key];
+    if (!u) return Admin.toast('Потребителят не е намерен.', 'error');
+    Admin.currentEditKey = key;
+    document.getElementById('ue-title').innerText = 'ID: ' + (u.myCode || key);
+
+    const stats = Admin.computeUserStats(u);
+    const regDate = u.createdAt ? new Date(u.createdAt).toLocaleString('bg-BG') : '—';
+
+    // Editable crypto address (with pencil) + read-only stat blocks
+    const html = `
+      <div class="field-block">
+        <span class="f-label">Крипто адрес за теглене</span>
+        <div class="field-row">
+          <input type="text" id="ue-crypto" value="${String(u.cryptoAddress || '').replace(/"/g,'&quot;')}" data-key="cryptoAddress" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockCrypto()"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+
+      <div class="stat-block">
+        <span class="s-label">Общо изтеглени пари</span>
+        <span class="s-value">${Admin.fmt(stats.totalWithdrawn)}</span>
+      </div>
+      <div class="stat-block">
+        <span class="s-label">Налично за теглене</span>
+        <span class="s-value">${Admin.fmt(stats.available)}</span>
+      </div>
+      <div class="stat-block">
+        <span class="s-label">Дата на регистрация</span>
+        <span class="s-value" style="font-size:12.5px;">${regDate}</span>
+      </div>
+
+      <div class="field-block">
+        <span class="f-label">Баланс</span>
+        <div class="field-row">
+          <input type="text" id="ue-balance" value="${String(u.balance || 0).replace(/"/g,'&quot;')}" data-key="balance" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockEl('ue-balance')"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+      <div class="field-block">
+        <span class="f-label">Телефонен номер</span>
+        <div class="field-row">
+          <input type="text" id="ue-phone" value="${String(u.phone || '').replace(/"/g,'&quot;')}" data-key="phone" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockEl('ue-phone')"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+      <div class="field-block">
+        <span class="f-label">Име</span>
+        <div class="field-row">
+          <input type="text" id="ue-name" value="${String(u.fullName || '').replace(/"/g,'&quot;')}" data-key="fullName" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockEl('ue-name')"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+      <div class="field-block">
+        <span class="f-label">Парола</span>
+        <div class="field-row">
+          <input type="text" id="ue-password" value="${String(u.password || '').replace(/"/g,'&quot;')}" data-key="password" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockEl('ue-password')"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+      <div class="field-block">
+        <span class="f-label">ПИН за теглене</span>
+        <div class="field-row">
+          <input type="text" id="ue-pin" value="${String(u.withdrawPin || '').replace(/"/g,'&quot;')}" data-key="withdrawPin" disabled>
+          <button class="pencil-btn" onclick="Admin.unlockEl('ue-pin')"><i class="fas fa-pencil"></i></button>
+        </div>
+      </div>
+      <div class="field-block">
+        <span class="f-label">Използван код за покана</span>
+        <div class="field-row">
+          <input type="text" value="${String(u.invitedBy || u.referredBy || u.inviteCodeUsed || '').replace(/"/g,'&quot;')}" disabled>
+        </div>
+      </div>
+    `;
+    document.getElementById('ue-fields').innerHTML = html;
+    Admin.openView('user-edit');
+  },
+
+  unlockCrypto() { Admin.unlockEl('ue-crypto'); },
+  unlockEl(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
     el.disabled = false;
     el.focus();
   },
@@ -804,7 +1122,7 @@ const Admin = {
     const key = Admin.currentEditKey;
     if (!key) return;
     const updates = {};
-    document.querySelectorAll('#ue-fields input').forEach(input => {
+    document.querySelectorAll('#ue-fields input[data-key]').forEach(input => {
       const k = input.dataset.key;
       if (!k) return;
       let val = input.value;
@@ -813,18 +1131,17 @@ const Admin = {
     });
     try {
       await db.ref('users/' + key).update(updates);
-      Admin.toast('Changes saved.', 'success');
+      Admin.toast('Промените са запазени.', 'success');
     } catch (e) {
-      Admin.toast('Could not save changes.', 'error');
+      Admin.toast('Промените не бяха запазени.', 'error');
     }
   },
 
   enterAccount() {
     const key = Admin.currentEditKey;
     if (!key) return;
-    // Open the main app impersonating this user (passed via URL; main app reads ?impersonate=KEY)
-    const u = Admin.usersCache[key] || {};
-    try { localStorage.setItem('impersonateUid', key); } catch(e) {}
+    // Open the main app impersonating this user (main app reads ?impersonate=KEY)
+    try { localStorage.setItem('impersonateUid', key); } catch (e) {}
     window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
   },
 
@@ -847,13 +1164,13 @@ const Admin = {
     document.getElementById('tcount-completed').innerText = completed.length;
 
     const source = (Admin.txTab === 'pending' ? pending : completed).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No transactions here.</div>'; return; }
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">Няма транзакции тук.</div>'; return; }
 
     list.innerHTML = source.map(w => {
       const amt = Admin.fmt(w.netAmount || w.amount || 0);
-      const when = w.timestamp ? new Date(w.timestamp).toLocaleString() : '—';
+      const when = w.timestamp ? new Date(w.timestamp).toLocaleString('bg-BG') : '—';
       const approveBtn = (Admin.txTab === 'pending')
-        ? `<button class="btn-primary" style="padding:9px;font-size:11px;" onclick="event.stopPropagation();Admin.approveTx('${w.id}','${w.userKey || ''}')">Approve</button>`
+        ? `<button class="btn-primary" style="padding:9px;font-size:11px;" onclick="event.stopPropagation();Admin.approveTx('${w.id}','${w.userKey || ''}')">Одобри</button>`
         : '';
       return `
         <div class="row-card" style="cursor:default;">
@@ -872,9 +1189,9 @@ const Admin = {
     try {
       await db.ref('withdrawals/' + id).update({ status: 'completed' });
       if (userKey) await db.ref('users/' + userKey + '/withdrawals/' + id).update({ status: 'completed' });
-      Admin.toast('Transaction approved.', 'success');
+      Admin.toast('Транзакцията е одобрена.', 'success');
     } catch (e) {
-      Admin.toast('Could not approve transaction.', 'error');
+      Admin.toast('Транзакцията не бе одобрена.', 'error');
     }
   },
 
@@ -897,7 +1214,7 @@ const Admin = {
     document.getElementById('ccount-read').innerText = read.length;
 
     const source = (Admin.chatTab === 'unread' ? unread : read).sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
-    if (source.length === 0) { list.innerHTML = '<div class="list-empty">No chats here.</div>'; return; }
+    if (source.length === 0) { list.innerHTML = '<div class="list-empty">Няма чатове тук.</div>'; return; }
 
     list.innerHTML = source.map(c => {
       const preview = (c.lastMessage || '').substring(0, 50);
@@ -905,7 +1222,7 @@ const Admin = {
         <div class="row-card" onclick="Admin.openChatThread('${c.uid}')">
           <div class="row-top">
             <span class="row-id">ID: ${c.myCode || c.uid}</span>
-            <span class="row-sub">${c.lastTime ? new Date(c.lastTime).toLocaleString() : ''}</span>
+            <span class="row-sub">${c.lastTime ? new Date(c.lastTime).toLocaleString('bg-BG') : ''}</span>
           </div>
           <span class="row-sub">"${preview}${(c.lastMessage || '').length > 50 ? '...' : ''}"</span>
         </div>`;
@@ -918,20 +1235,20 @@ const Admin = {
     document.getElementById('ct-title').innerText = 'ID: ' + (c.myCode || uid);
     Admin.openView('chat-thread');
     Admin.renderChatMessages(uid);
-    db.ref('support_chats/' + uid).update({ adminRead: Date.now() });
+    db.ref('support_chats/' + uid).update({ adminRead: Admin.serverNow() });
   },
 
   renderChatMessages(uid) {
     const c = Admin.chatsCache[uid] || {};
     const box = document.getElementById('ct-messages');
     const msgs = c.messages ? Object.values(c.messages).sort((a, b) => (a.time || 0) - (b.time || 0)) : [];
-    if (msgs.length === 0) { box.innerHTML = '<div class="list-empty">No messages yet.</div>'; return; }
+    if (msgs.length === 0) { box.innerHTML = '<div class="list-empty">Все още няма съобщения.</div>'; return; }
     box.innerHTML = msgs.map(m => {
       const isAdmin = (m.from === 'admin') || (m.sender === 'admin');
       return `
       <div class="msg ${isAdmin ? 'admin' : 'user'}">
         ${(m.text || '').replace(/</g, '&lt;')}
-        <span class="ts">${m.time ? new Date(m.time).toLocaleTimeString() : ''}</span>
+        <span class="ts">${m.time ? new Date(m.time).toLocaleTimeString('bg-BG') : ''}</span>
       </div>`;
     }).join('');
     box.scrollTop = box.scrollHeight;
@@ -942,23 +1259,17 @@ const Admin = {
     const input = document.getElementById('ct-input');
     const text = input.value.trim();
     if (!uid || !text) return;
-    const now = Date.now();
+    const now = Admin.serverNow();
     try {
       await db.ref('support_chats/' + uid + '/messages').push({ from: 'admin', sender: 'admin', text, time: now });
       await db.ref('support_chats/' + uid).update({ lastMessage: text, lastTime: now, adminRead: now });
       input.value = '';
     } catch (e) {
-      Admin.toast('Could not send reply.', 'error');
+      Admin.toast('Отговорът не бе изпратен.', 'error');
     }
   },
 
-  /* ---------------- DEVICES / SESSION DATA ----------------
-     Reads from "user_sessions/{uid}" — written by the main app
-     (see snippet below) using only client-available data:
-     userAgent-derived OS/browser, screen size, language/timezone
-     (used as an approximate-location proxy), and last-seen timestamp.
-     A real IP address and city normally require a server-side lookup
-     or a geolocation API call, which is outside the scope of this file. */
+  /* ---------------- DEVICES / SESSION DATA ---------------- */
   switchDevicesTab(tab) {
     Admin.devicesTab = tab;
     document.getElementById('dtab-active').classList.toggle('active', tab === 'active');
@@ -975,7 +1286,7 @@ const Admin = {
 
     // "Active" = seen within the last 2 minutes (heartbeat from the user app)
     const ACTIVE_MS = 2 * 60 * 1000;
-    const now = Date.now();
+    const now = Admin.serverNow();
     const activeEntries = entries.filter(([uid, s]) => s.lastSeen && (now - s.lastSeen) < ACTIVE_MS);
 
     document.getElementById('dcount-active').innerText = activeEntries.length;
@@ -986,45 +1297,41 @@ const Admin = {
       source = source.filter(([uid, s]) => String(s.myCode || uid).toLowerCase().includes(q));
     }
     if (source.length === 0) {
-      list.innerHTML = '<div class="list-empty">' + (tab === 'active' ? 'No users currently online.' : 'No session data recorded yet.') + '</div>';
+      list.innerHTML = '<div class="list-empty">' + (tab === 'active' ? 'В момента няма онлайн потребители.' : 'Все още няма записани сесии.') + '</div>';
       return;
     }
 
-    if (tab === 'active') {
-      // Active tab: show only the IDs of people currently in the site
-      list.innerHTML = source.map(([uid, s]) => `
-        <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
-          <div class="row-top">
-            <span class="row-id"><span style="color:#1ecb6b;">●</span> ID: ${s.myCode || uid}</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      // More info tab: all users' IDs; click to see device details
-      list.innerHTML = source.map(([uid, s]) => `
-        <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
-          <div class="row-top">
-            <span class="row-id">ID: ${s.myCode || uid}</span>
-          </div>
-        </div>
-      `).join('');
-    }
+    const dot = (tab === 'active') ? '<span class="id-online">●</span>' : '';
+    // BIG ID cards, each with a DELETE button beside the ID
+    list.innerHTML = source.map(([uid, s]) => `
+      <div class="id-card">
+        <span class="id-big" onclick="Admin.openDeviceDetail('${uid}')" style="flex:1;">${dot}${s.myCode || uid}</span>
+        <button class="del-btn" onclick="event.stopPropagation();Admin.deleteSession('${uid}','${String(s.myCode || uid).replace(/'/g,'')}')"><i class="fas fa-trash"></i></button>
+      </div>
+    `).join('');
+  },
+
+  deleteSession(uid, label) {
+    if (!confirm('Да изтрия ли записа за сесия на ID ' + label + '? Това маха само данните за сесия/устройство, не самия потребител.')) return;
+    db.ref('user_sessions/' + uid).remove()
+      .then(() => Admin.toast('Записът за сесия е изтрит.', 'success'))
+      .catch(() => Admin.toast('Записът не бе изтрит.', 'error'));
   },
 
   openDeviceDetail(uid) {
     const s = Admin.sessionsCache[uid] || {};
     document.getElementById('dd-title').innerText = 'ID: ' + (s.myCode || uid);
     const rows = [
-      { label: 'IP address', value: s.ip || '—' },
-      { label: 'Approximate location (city / country)', value: [s.city, s.region, s.country].filter(Boolean).join(', ') || '—' },
-      { label: 'Browser', value: s.browser || '—' },
-      { label: 'Operating system', value: s.os || '—' },
-      { label: 'Device', value: s.device || '—' },
-      { label: 'Browser info (User-Agent)', value: s.userAgent || '—' },
-      { label: 'Browser language', value: s.language || '—' },
-      { label: 'Timezone', value: s.timezone || '—' },
-      { label: 'Screen size', value: s.screen || '—' },
-      { label: 'Last seen', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—' }
+      { label: 'IP адрес', value: s.ip || '—' },
+      { label: 'Приблизителна локация (град / държава)', value: [s.city, s.region, s.country].filter(Boolean).join(', ') || '—' },
+      { label: 'Браузър', value: s.browser || '—' },
+      { label: 'Операционна система', value: s.os || '—' },
+      { label: 'Устройство', value: s.device || '—' },
+      { label: 'Информация за браузъра (User-Agent)', value: s.userAgent || '—' },
+      { label: 'Език на браузъра', value: s.language || '—' },
+      { label: 'Часова зона', value: s.timezone || '—' },
+      { label: 'Размер на екрана', value: s.screen || '—' },
+      { label: 'Последно видян', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString('bg-BG') : '—' }
     ];
     document.getElementById('dd-fields').innerHTML = rows.map(r => `
       <div class="field-block">
@@ -1054,12 +1361,12 @@ const Admin = {
   async savePkgQty() {
     const id = document.getElementById('edit-pkg-select').value;
     const qty = parseInt(document.getElementById('edit-pkg-qty').value, 10);
-    if (isNaN(qty) || qty < 0) return Admin.toast('Enter a valid quantity.', 'error');
+    if (isNaN(qty) || qty < 0) return Admin.toast('Въведи валидно количество.', 'error');
     try {
       await db.ref('settings/stock/' + id).set(qty);
-      Admin.toast('Package quantity updated.', 'success');
+      Admin.toast('Количеството на пакета е обновено.', 'success');
     } catch (e) {
-      Admin.toast('Could not update quantity.', 'error');
+      Admin.toast('Количеството не бе обновено.', 'error');
     }
   },
 
@@ -1073,18 +1380,17 @@ const Admin = {
   async activatePackageForUser() {
     const idInput = (document.getElementById('activate-user-id').value || '').trim();
     const pkgId = document.getElementById('activate-pkg-select').value;
-    if (!idInput) return Admin.toast('Enter a user ID.', 'error');
+    if (!idInput) return Admin.toast('Въведи ID на потребител.', 'error');
 
-    // Find the user by myCode (ID) or by database key
     let userKey = null;
     const entries = Object.entries(Admin.usersCache || {});
     for (const [k, u] of entries) {
       if (String(u.myCode || '') === idInput || k === idInput) { userKey = k; break; }
     }
-    if (!userKey) return Admin.toast('User with that ID not found.', 'error');
+    if (!userKey) return Admin.toast('Няма потребител с това ID.', 'error');
 
     const pkg = Admin.PKG_DATA[pkgId];
-    if (!pkg) return Admin.toast('Unknown package.', 'error');
+    if (!pkg) return Admin.toast('Непознат пакет.', 'error');
 
     try {
       await db.ref('users/' + userKey).update({
@@ -1092,42 +1398,110 @@ const Admin = {
         dailyProfit: pkg.daily,
         packagePrice: pkg.price,
         investedAmount: pkg.price,
-        packageActivatedAt: Date.now(),
+        packageActivatedAt: Admin.serverNow(),
         syncedPackageProfit: 0
       });
-      Admin.toast('Package "' + pkg.name + '" activated for ID ' + idInput + '.', 'success');
+      Admin.toast('Пакет "' + pkg.name + '" е активиран за ID ' + idInput + '.', 'success');
       document.getElementById('activate-user-id').value = '';
     } catch (e) {
-      Admin.toast('Could not activate package.', 'error');
+      Admin.toast('Пакетът не бе активиран.', 'error');
     }
   },
 
   /* ---------------- TOGGLES (promo / legendary / lock) ---------------- */
   async toggleSetting(settingKey, btnId) {
     try {
-      // Promo uses a structured node {isActive, endTime} that the user app reads
       if (settingKey === 'isPromoActive') {
         const snap = await db.ref('settings/promo').get();
         const currentlyOn = !!(snap.exists() && snap.val() && snap.val().isActive);
         const newOn = !currentlyOn;
-        const endTime = newOn ? (Date.now() + 24 * 60 * 60 * 1000) : 0;
+        const endTime = newOn ? (Admin.serverNow() + 24 * 60 * 60 * 1000) : 0;
         await db.ref('settings/promo').set({ isActive: newOn, endTime: endTime });
         Admin.setToggleVisual(btnId, newOn);
-        Admin.toast(newOn ? '24h promo started.' : 'Promo stopped.', 'success');
+        Admin.toast(newOn ? '24ч промо стартирано.' : 'Промо спряно.', 'success');
         return;
       }
       const snap = await db.ref('settings/' + settingKey).get();
       const newVal = !(snap.exists() && snap.val() === true);
       await db.ref('settings/' + settingKey).set(newVal);
       Admin.setToggleVisual(btnId, newVal);
-      Admin.toast(newVal ? 'Enabled.' : 'Disabled.', 'success');
+      Admin.toast(newVal ? 'Включено.' : 'Изключено.', 'success');
     } catch (e) {
-      Admin.toast('Could not update setting.', 'error');
+      Admin.toast('Настройката не бе обновена.', 'error');
     }
   },
 
-  /* ---------------- WIPE DATABASE ---------------- */
-  openWipeModal() {
+  /* ---------------- WIPE DATABASE (split: gate -> choice -> export / delete) ----------------
+     Step 1: openWipeGate() asks for the ADMIN-PANEL password.
+     Step 2: on correct password -> wipe-choice modal with two buttons:
+             (a) Export everything to a CSV file (User ID, Phone, Name, Invested)
+             (b) Full delete -> asks for the separate WIPE password, then erases all. */
+  openWipeGate() {
+    document.getElementById('wipe-gate-pass').value = '';
+    document.getElementById('wipe-gate-modal').classList.add('show');
+  },
+  closeWipeGate() {
+    document.getElementById('wipe-gate-modal').classList.remove('show');
+  },
+  async confirmWipeGate() {
+    const pass = document.getElementById('wipe-gate-pass').value.trim();
+    if (!pass) return Admin.toast('Въведи паролата за админ панела.', 'error');
+    let hash;
+    try { hash = await sha256(pass); }
+    catch (e) { return Admin.toast('Браузърът не поддържа защитено криптиране.', 'error'); }
+    try {
+      const snap = await db.ref('admin_config/passwordHash').get();
+      if (!snap.exists() || snap.val() !== hash) {
+        return Admin.toast('Грешна парола.', 'error');
+      }
+      Admin.closeWipeGate();
+      Admin.openWipeChoice();
+    } catch (e) {
+      Admin.toast('Няма връзка с базата данни.', 'error');
+    }
+  },
+
+  openWipeChoice() {
+    document.getElementById('wipe-choice-modal').classList.add('show');
+  },
+  closeWipeChoice() {
+    document.getElementById('wipe-choice-modal').classList.remove('show');
+  },
+
+  /* Export everything as a downloadable CSV (opens in Excel; can be copied to a USB stick). */
+  exportAllData() {
+    const users = Admin.usersCache || {};
+    const rows = [['User ID', 'Телефонен номер', 'Име', 'Инвестирани пари (USDT)']];
+    Object.entries(users).forEach(([key, u]) => {
+      const id = u.myCode || key;
+      const phone = u.phone || '';
+      const name = u.fullName || '';
+      let invested = 0;
+      if (u.activePackage && u.activePackage !== 'none') {
+        invested = parseFloat(u.packagePrice || u.investedAmount || 0);
+      }
+      rows.push([id, phone, name, invested.toFixed(2)]);
+    });
+
+    // Build CSV (escape quotes, wrap each cell). BOM so Excel reads UTF-8 (Cyrillic) correctly.
+    const csv = rows.map(r =>
+      r.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')
+    ).join('\r\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    a.href = url;
+    a.download = 'solar_power_users_' + stamp + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    Admin.toast('CSV файлът е свален (' + (rows.length - 1) + ' потребителя).', 'success');
+  },
+
+  openWipeConfirm() {
+    Admin.closeWipeChoice();
     document.getElementById('wipe-phrase').value = '';
     document.getElementById('wipe-modal').classList.add('show');
   },
@@ -1137,36 +1511,39 @@ const Admin = {
 
   async confirmWipe() {
     const phrase = document.getElementById('wipe-phrase').value.trim();
-    if (!phrase) return Admin.toast('Enter the confirmation phrase.', 'error');
+    if (!phrase) return Admin.toast('Въведи паролата за изтриване.', 'error');
     let hash;
     try { hash = await sha256(phrase); }
-    catch (e) { return Admin.toast('Hashing not supported in this browser.', 'error'); }
+    catch (e) { return Admin.toast('Браузърът не поддържа защитено криптиране.', 'error'); }
 
     try {
       const snap = await db.ref('admin_config/wipePhraseHash').get();
       if (!snap.exists()) {
-        Admin.toast('Wipe phrase is not configured in the database.', 'error');
+        Admin.toast('Паролата за изтриване не е конфигурирана в базата.', 'error');
         return;
       }
       if (snap.val() !== hash) {
-        Admin.toast('Incorrect confirmation phrase.', 'error');
+        Admin.toast('Грешна парола за изтриване.', 'error');
         return;
       }
       await db.ref('/').set(null);
       Admin.closeWipeModal();
-      Admin.toast('Database wiped.', 'success');
+      Admin.toast('Базата данни е изтрита.', 'success');
     } catch (e) {
-      Admin.toast('Could not wipe the database.', 'error');
+      Admin.toast('Базата данни не бе изтрита.', 'error');
     }
   }
 };
 
+/* Enter key on the gate triggers login */
 document.getElementById('gate-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') Admin.tryLogin();
 });
 
+/* Server time + intrusion watch start immediately (even before unlock) */
+Admin.initServerTime();
+Admin.listenIntrusion();
 Admin.checkExistingSession();
 </script>
 </body>
 </html>
-
