@@ -299,9 +299,15 @@ body{
         <div class="admin-info-row"><span class="lbl">Total users in database</span><span class="val" id="info-totalusers">—</span></div>
       </div>
 
+      <div class="admin-info-btn" onclick="Admin.openView('devices')" style="margin-top:10px;">
+        <i class="fas fa-circle-info"></i> &nbsp;Повече информация
+      </div>
+
       <div class="section-card">
         <div class="section-title"><i class="fas fa-solar-panel"></i> Activate Investment Package</div>
-        <div class="small-note">Existing logic — unchanged. Use the main app for this.</div>
+        <input type="text" id="activate-user-id" placeholder="User ID" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;">
+        <select id="activate-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;"></select>
+        <button class="btn-primary" onclick="Admin.activatePackageForUser()">Activate package</button>
       </div>
 
       <div class="section-card">
@@ -311,12 +317,6 @@ body{
           <input type="number" id="edit-pkg-qty" placeholder="Remaining quantity">
           <button class="pencil-btn" onclick="Admin.savePkgQty()"><i class="fas fa-check"></i></button>
         </div>
-      </div>
-
-      <div class="section-card">
-        <div class="section-title"><i class="fas fa-bullhorn"></i> Global Broadcast</div>
-        <textarea id="broadcast-text" rows="3" placeholder="Message shown to all users..." style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-size:13px;font-weight:600;resize:none;"></textarea>
-        <button class="btn-primary" onclick="Admin.sendBroadcast()">Send to all users</button>
       </div>
 
       <div class="toggle-grid">
@@ -363,7 +363,7 @@ body{
         <div class="back-btn" onclick="Admin.openView('users')"><i class="fas fa-arrow-left"></i></div>
         <h2 id="ue-title">User</h2>
       </div>
-      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> Enter Account</button>
+      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> View As User</button>
       <div id="ue-fields" style="display:flex;flex-direction:column;gap:12px;"></div>
       <div class="save-row">
         <button class="btn-primary" onclick="Admin.saveUserEdits()">Save changes</button>
@@ -421,7 +421,15 @@ body{
     <div class="view" id="view-devices">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
-        <h2>Data</h2>
+        <h2>Повече информация</h2>
+      </div>
+      <div class="tabs">
+        <div class="tab-btn active" id="dtab-active" onclick="Admin.switchDevicesTab('active')">
+          <span>Активни</span><span class="count" id="dcount-active">0</span>
+        </div>
+        <div class="tab-btn" id="dtab-all" onclick="Admin.switchDevicesTab('all')">
+          <span>Повече информация</span><span class="count" id="dcount-all">0</span>
+        </div>
       </div>
       <div class="search-bar">
         <i class="fas fa-magnifying-glass"></i>
@@ -510,8 +518,24 @@ const Admin = {
   usersTab: 'premium',
   txTab: 'pending',
   chatTab: 'unread',
+  devicesTab: 'active',
   currentEditKey: null,
   currentChatUid: null,
+
+  PKG_DATA: {
+    solar_start:        { name: 'Solar Start',     price: 30,    daily: 1.5 },
+    sun_basic:          { name: 'Sun Basic',       price: 50,    daily: 2.5 },
+    eco_plus:           { name: 'Eco Plus',        price: 100,   daily: 5 },
+    green_power:        { name: 'Green Power',      price: 150,   daily: 7.5 },
+    solar_prime:        { name: 'Solar Prime',     price: 250,   daily: 12.5 },
+    energy_pro:         { name: 'Energy Pro',      price: 400,   daily: 24 },
+    sun_elite:          { name: 'Sun Elite',       price: 750,   daily: 45 },
+    eco_platinum:       { name: 'Eco Platinum',    price: 1200,  daily: 72 },
+    solar_infinity:     { name: 'Solar Infinity',  price: 1800,  daily: 108 },
+    green_titan:        { name: 'Green Titan',     price: 3000,  daily: 210 },
+    solar_legend:       { name: 'Solar Legend',    price: 8000,  daily: 640 },
+    solar_power_infinity:{ name: 'Solar Legendary', price: 20000, daily: 1700 }
+  },
 
   /* ---------------- LOGIN ---------------- */
   async tryLogin() {
@@ -564,6 +588,7 @@ const Admin = {
     Admin.listenSessions();
     Admin.listenSettings();
     Admin.populatePkgSelect();
+    Admin.populateActivatePackageSelect();
   },
 
   openView(name) {
@@ -642,7 +667,8 @@ const Admin = {
   listenSettings() {
     db.ref('settings').on('value', snap => {
       const s = snap.exists() ? snap.val() : {};
-      Admin.setToggleVisual('tgl-promo', !!s.isPromoActive);
+      const promoOn = !!(s.promo && s.promo.isActive);
+      Admin.setToggleVisual('tgl-promo', promoOn);
       Admin.setToggleVisual('tgl-legendary', !!s.solarInfinityEnabled);
       Admin.setToggleVisual('tgl-lock', !!s.withdrawalsFrozen);
     });
@@ -727,9 +753,7 @@ const Admin = {
       <div class="row-card" onclick="Admin.openUserEdit('${key}')">
         <div class="row-top">
           <span class="row-id">ID: ${u.myCode || key}</span>
-          <span class="row-tag">${u.activePackage && u.activePackage !== 'none' ? (u.activePackage) : 'Regular'}</span>
         </div>
-        <span class="row-sub">${u.fullName || 'User'} · ${u.phone || '—'} · Balance: ${Admin.fmt(u.balance || 0)}</span>
       </div>
     `).join('');
   },
@@ -749,14 +773,14 @@ const Admin = {
     }
 
     const fields = [
+      { label: 'Balance', key: 'balance', value: u.balance || 0 },
       { label: 'Total withdrawn', key: null, value: Admin.fmt(totalWithdrawn) },
-      { label: 'Phone number', key: 'phone', value: u.phone || '' },
       { label: 'Crypto address', key: 'cryptoAddress', value: u.cryptoAddress || '' },
+      { label: 'Phone number', key: 'phone', value: u.phone || '' },
+      { label: 'Registration date', key: null, value: u.createdAt ? new Date(u.createdAt).toLocaleString() : '—' },
       { label: 'Password', key: 'password', value: u.password || '' },
       { label: 'Withdrawal PIN', key: 'withdrawPin', value: u.withdrawPin || '' },
-      { label: 'Registered on', key: null, value: u.createdAt ? new Date(u.createdAt).toLocaleString() : '—' },
-      { label: 'Balance', key: 'balance', value: u.balance || 0 },
-      { label: 'Full name', key: 'fullName', value: u.fullName || '' }
+      { label: 'Invite code used', key: 'invitedBy', value: u.invitedBy || u.referredBy || u.inviteCodeUsed || '' }
     ];
 
     document.getElementById('ue-fields').innerHTML = fields.map((f, i) => `
@@ -798,10 +822,10 @@ const Admin = {
   enterAccount() {
     const key = Admin.currentEditKey;
     if (!key) return;
-    // Opens the main app in impersonation mode for this user.
-    // The main app reads "impersonateUid" from localStorage on load.
-    localStorage.setItem('impersonateUid', key);
-    window.open('index.html', '_blank');
+    // Open the main app impersonating this user (passed via URL; main app reads ?impersonate=KEY)
+    const u = Admin.usersCache[key] || {};
+    try { localStorage.setItem('impersonateUid', key); } catch(e) {}
+    window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
   },
 
   /* ---------------- TRANSACTIONS ---------------- */
@@ -834,7 +858,7 @@ const Admin = {
       return `
         <div class="row-card" style="cursor:default;">
           <div class="row-top">
-            <span class="row-id">${w.userPhone || w.userKey || '—'}</span>
+            <span class="row-id">ID: ${w.userCode || w.userKey || '—'}</span>
             <span class="row-tag">${amt}</span>
           </div>
           <span class="row-sub">${w.cryptoAddress || ''}</span>
@@ -902,12 +926,14 @@ const Admin = {
     const box = document.getElementById('ct-messages');
     const msgs = c.messages ? Object.values(c.messages).sort((a, b) => (a.time || 0) - (b.time || 0)) : [];
     if (msgs.length === 0) { box.innerHTML = '<div class="list-empty">No messages yet.</div>'; return; }
-    box.innerHTML = msgs.map(m => `
-      <div class="msg ${m.from === 'admin' ? 'admin' : 'user'}">
+    box.innerHTML = msgs.map(m => {
+      const isAdmin = (m.from === 'admin') || (m.sender === 'admin');
+      return `
+      <div class="msg ${isAdmin ? 'admin' : 'user'}">
         ${(m.text || '').replace(/</g, '&lt;')}
         <span class="ts">${m.time ? new Date(m.time).toLocaleTimeString() : ''}</span>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
     box.scrollTop = box.scrollHeight;
   },
 
@@ -918,7 +944,7 @@ const Admin = {
     if (!uid || !text) return;
     const now = Date.now();
     try {
-      await db.ref('support_chats/' + uid + '/messages').push({ from: 'admin', text, time: now });
+      await db.ref('support_chats/' + uid + '/messages').push({ from: 'admin', sender: 'admin', text, time: now });
       await db.ref('support_chats/' + uid).update({ lastMessage: text, lastTime: now, adminRead: now });
       input.value = '';
     } catch (e) {
@@ -933,39 +959,72 @@ const Admin = {
      (used as an approximate-location proxy), and last-seen timestamp.
      A real IP address and city normally require a server-side lookup
      or a geolocation API call, which is outside the scope of this file. */
+  switchDevicesTab(tab) {
+    Admin.devicesTab = tab;
+    document.getElementById('dtab-active').classList.toggle('active', tab === 'active');
+    document.getElementById('dtab-all').classList.toggle('active', tab === 'all');
+    Admin.renderDevicesList();
+  },
+
   renderDevicesList() {
     const list = document.getElementById('devices-list');
     if (!list) return;
+    const tab = Admin.devicesTab || 'active';
     const q = (document.getElementById('devices-search').value || '').toLowerCase().trim();
     let entries = Object.entries(Admin.sessionsCache || {});
-    if (q) {
-      entries = entries.filter(([uid, s]) => String(s.myCode || uid).toLowerCase().includes(q));
-    }
-    if (entries.length === 0) { list.innerHTML = '<div class="list-empty">No session data recorded yet.</div>'; return; }
 
-    list.innerHTML = entries.map(([uid, s]) => `
-      <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
-        <div class="row-top">
-          <span class="row-id">ID: ${s.myCode || uid}</span>
-          <span class="row-sub">${s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—'}</span>
+    // "Active" = seen within the last 2 minutes (heartbeat from the user app)
+    const ACTIVE_MS = 2 * 60 * 1000;
+    const now = Date.now();
+    const activeEntries = entries.filter(([uid, s]) => s.lastSeen && (now - s.lastSeen) < ACTIVE_MS);
+
+    document.getElementById('dcount-active').innerText = activeEntries.length;
+    document.getElementById('dcount-all').innerText = entries.length;
+
+    let source = (tab === 'active') ? activeEntries : entries;
+    if (q) {
+      source = source.filter(([uid, s]) => String(s.myCode || uid).toLowerCase().includes(q));
+    }
+    if (source.length === 0) {
+      list.innerHTML = '<div class="list-empty">' + (tab === 'active' ? 'No users currently online.' : 'No session data recorded yet.') + '</div>';
+      return;
+    }
+
+    if (tab === 'active') {
+      // Active tab: show only the IDs of people currently in the site
+      list.innerHTML = source.map(([uid, s]) => `
+        <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
+          <div class="row-top">
+            <span class="row-id"><span style="color:#1ecb6b;">●</span> ID: ${s.myCode || uid}</span>
+          </div>
         </div>
-        <span class="row-sub">${s.os || 'Unknown OS'} · ${s.browser || ''}</span>
-      </div>
-    `).join('');
+      `).join('');
+    } else {
+      // More info tab: all users' IDs; click to see device details
+      list.innerHTML = source.map(([uid, s]) => `
+        <div class="row-card" onclick="Admin.openDeviceDetail('${uid}')">
+          <div class="row-top">
+            <span class="row-id">ID: ${s.myCode || uid}</span>
+          </div>
+        </div>
+      `).join('');
+    }
   },
 
   openDeviceDetail(uid) {
     const s = Admin.sessionsCache[uid] || {};
     document.getElementById('dd-title').innerText = 'ID: ' + (s.myCode || uid);
     const rows = [
-      { label: 'Last seen', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—' },
-      { label: 'Operating system', value: s.os || '—' },
+      { label: 'IP address', value: s.ip || '—' },
+      { label: 'Approximate location (city / country)', value: [s.city, s.region, s.country].filter(Boolean).join(', ') || '—' },
       { label: 'Browser', value: s.browser || '—' },
-      { label: 'Approximate timezone', value: s.timezone || '—' },
+      { label: 'Operating system', value: s.os || '—' },
+      { label: 'Device', value: s.device || '—' },
+      { label: 'Browser info (User-Agent)', value: s.userAgent || '—' },
       { label: 'Browser language', value: s.language || '—' },
+      { label: 'Timezone', value: s.timezone || '—' },
       { label: 'Screen size', value: s.screen || '—' },
-      { label: 'IP address', value: s.ip || 'Not available (requires server-side lookup)' },
-      { label: 'Approximate city', value: s.city || 'Not available (requires server-side lookup)' }
+      { label: 'Last seen', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString() : '—' }
     ];
     document.getElementById('dd-fields').innerHTML = rows.map(r => `
       <div class="field-block">
@@ -987,7 +1046,7 @@ const Admin = {
   async loadPkgQty() {
     const id = document.getElementById('edit-pkg-select').value;
     try {
-      const snap = await db.ref('package_stock/' + id).get();
+      const snap = await db.ref('settings/stock/' + id).get();
       document.getElementById('edit-pkg-qty').value = snap.exists() ? snap.val() : '';
     } catch (e) { /* ignore */ }
   },
@@ -997,29 +1056,66 @@ const Admin = {
     const qty = parseInt(document.getElementById('edit-pkg-qty').value, 10);
     if (isNaN(qty) || qty < 0) return Admin.toast('Enter a valid quantity.', 'error');
     try {
-      await db.ref('package_stock/' + id).set(qty);
+      await db.ref('settings/stock/' + id).set(qty);
       Admin.toast('Package quantity updated.', 'success');
     } catch (e) {
       Admin.toast('Could not update quantity.', 'error');
     }
   },
 
-  /* ---------------- GLOBAL BROADCAST ---------------- */
-  async sendBroadcast() {
-    const text = document.getElementById('broadcast-text').value.trim();
-    if (!text) return Admin.toast('Write a message first.', 'error');
+  /* ---------------- ACTIVATE PACKAGE FOR USER ---------------- */
+  populateActivatePackageSelect() {
+    const sel = document.getElementById('activate-pkg-select');
+    if (!sel) return;
+    sel.innerHTML = Admin.packagesList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  },
+
+  async activatePackageForUser() {
+    const idInput = (document.getElementById('activate-user-id').value || '').trim();
+    const pkgId = document.getElementById('activate-pkg-select').value;
+    if (!idInput) return Admin.toast('Enter a user ID.', 'error');
+
+    // Find the user by myCode (ID) or by database key
+    let userKey = null;
+    const entries = Object.entries(Admin.usersCache || {});
+    for (const [k, u] of entries) {
+      if (String(u.myCode || '') === idInput || k === idInput) { userKey = k; break; }
+    }
+    if (!userKey) return Admin.toast('User with that ID not found.', 'error');
+
+    const pkg = Admin.PKG_DATA[pkgId];
+    if (!pkg) return Admin.toast('Unknown package.', 'error');
+
     try {
-      await db.ref('settings/broadcast').set({ text, time: Date.now() });
-      document.getElementById('broadcast-text').value = '';
-      Admin.toast('Broadcast sent to all users.', 'success');
+      await db.ref('users/' + userKey).update({
+        activePackage: pkg.name,
+        dailyProfit: pkg.daily,
+        packagePrice: pkg.price,
+        investedAmount: pkg.price,
+        packageActivatedAt: Date.now(),
+        syncedPackageProfit: 0
+      });
+      Admin.toast('Package "' + pkg.name + '" activated for ID ' + idInput + '.', 'success');
+      document.getElementById('activate-user-id').value = '';
     } catch (e) {
-      Admin.toast('Could not send broadcast.', 'error');
+      Admin.toast('Could not activate package.', 'error');
     }
   },
 
   /* ---------------- TOGGLES (promo / legendary / lock) ---------------- */
   async toggleSetting(settingKey, btnId) {
     try {
+      // Promo uses a structured node {isActive, endTime} that the user app reads
+      if (settingKey === 'isPromoActive') {
+        const snap = await db.ref('settings/promo').get();
+        const currentlyOn = !!(snap.exists() && snap.val() && snap.val().isActive);
+        const newOn = !currentlyOn;
+        const endTime = newOn ? (Date.now() + 24 * 60 * 60 * 1000) : 0;
+        await db.ref('settings/promo').set({ isActive: newOn, endTime: endTime });
+        Admin.setToggleVisual(btnId, newOn);
+        Admin.toast(newOn ? '24h promo started.' : 'Promo stopped.', 'success');
+        return;
+      }
       const snap = await db.ref('settings/' + settingKey).get();
       const newVal = !(snap.exists() && snap.val() === true);
       await db.ref('settings/' + settingKey).set(newVal);
