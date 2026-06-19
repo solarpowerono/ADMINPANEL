@@ -306,6 +306,27 @@ body{
 .modal-choice-row button{width:100%;}
 
 .small-note{font-size:10.5px;color:#8ea0c2;text-align:center;}
+
+/* Numeric keypad keys */
+.numpad-key{
+  padding:16px 0;font-size:22px;font-weight:800;color:#fff;
+  background:rgba(255,255,255,0.06);border:1.5px solid var(--gold);
+  border-radius:12px;cursor:pointer;transition:all 0.15s ease;
+}
+.numpad-key:hover{background:rgba(212,175,55,0.18);}
+.numpad-key:active{border-color:var(--gold-bright);box-shadow:0 0 14px rgba(212,175,55,0.5);}
+
+/* Dropdown picker rows */
+.admin-picker-item{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;
+  color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.admin-picker-item:hover{background:rgba(212,175,55,0.15);}
+.admin-picker-trigger{
+  width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);
+  background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+}
 </style>
 </head>
 <body>
@@ -368,18 +389,34 @@ body{
         <div class="admin-info-row"><span class="lbl">Общо потребители в базата</span><span class="val" id="info-totalusers">—</span></div>
       </div>
 
+      <div class="section-card" id="inspect-account-card" style="display:none;">
+        <div class="section-title"><i class="fas fa-magnifying-glass"></i> Инспекция на акаунт</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="inspect-user-id" placeholder="ID на потребител" readonly onclick="Admin.openNumpad('inspect-user-id')" style="flex:1;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;cursor:pointer;">
+          <button class="btn-primary" style="width:auto;padding:11px 16px;" onclick="Admin.inspectAccount()"><i class="fas fa-magnifying-glass"></i></button>
+        </div>
+      </div>
+
       <div class="section-card">
         <div class="section-title"><i class="fas fa-solar-panel"></i> Активиране на инвестиционен пакет</div>
-        <input type="text" id="activate-user-id" placeholder="ID на потребител" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;">
-        <select id="activate-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;"></select>
+        <input type="text" id="activate-user-id" placeholder="ID на потребител" readonly onclick="Admin.openNumpad('activate-user-id','ID на потребител')" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;cursor:pointer;">
+        <div class="admin-picker-trigger" style="margin-bottom:8px;" onclick="Admin.openPackagePicker('activate')">
+          <span id="activate-pkg-text">Избери пакет</span>
+          <i class="fas fa-chevron-down" style="color:var(--gold-bright);"></i>
+        </div>
+        <input type="hidden" id="activate-pkg-select">
         <button class="btn-primary" onclick="Admin.activatePackageForUser()">Активирай пакета</button>
       </div>
 
       <div class="section-card">
         <div class="section-title"><i class="fas fa-layer-group"></i> Редакция на количество пакети</div>
-        <select id="edit-pkg-select" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;"></select>
-        <div class="field-row">
-          <input type="number" id="edit-pkg-qty" placeholder="Оставащо количество">
+        <div class="admin-picker-trigger" onclick="Admin.openPackagePicker('edit')">
+          <span id="edit-pkg-text">Избери пакет</span>
+          <i class="fas fa-chevron-down" style="color:var(--gold-bright);"></i>
+        </div>
+        <input type="hidden" id="edit-pkg-select">
+        <div class="field-row" style="margin-top:10px;">
+          <input type="text" id="edit-pkg-qty" placeholder="Оставащо количество" readonly onclick="Admin.openNumpad('edit-pkg-qty','Оставащо количество')" style="cursor:pointer;">
           <button class="pencil-btn" onclick="Admin.savePkgQty()"><i class="fas fa-check"></i></button>
         </div>
       </div>
@@ -428,7 +465,6 @@ body{
         <div class="back-btn" onclick="Admin.openView('users')"><i class="fas fa-arrow-left"></i></div>
         <h2 id="ue-title">Потребител</h2>
       </div>
-      <button class="btn-primary" onclick="Admin.enterAccount()"><i class="fas fa-right-to-bracket"></i> Преглед на акаунта</button>
       <div id="ue-fields" style="display:flex;flex-direction:column;gap:12px;"></div>
       <div class="save-row">
         <button class="btn-primary" onclick="Admin.saveUserEdits()">Запази промените</button>
@@ -516,6 +552,43 @@ body{
 </div>
 
 <div id="toast"></div>
+
+<!-- NUMERIC KEYPAD MODAL -->
+<div id="numpad-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;" onclick="if(event.target===this) Admin.closeNumpad()">
+  <div style="width:90%;max-width:320px;background:#10131a;border:1.5px solid var(--gold);border-radius:18px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span id="numpad-title" style="color:#fff;font-weight:700;font-size:14px;">Въведи стойност</span>
+      <i class="fas fa-times" style="color:#fff;cursor:pointer;font-size:18px;" onclick="Admin.closeNumpad()"></i>
+    </div>
+    <div id="numpad-display" style="min-height:48px;background:rgba(255,255,255,0.06);border:1px solid var(--gold);border-radius:10px;padding:12px 14px;color:#fff;font-size:22px;font-weight:800;text-align:right;margin-bottom:14px;letter-spacing:1px;word-break:break-all;">&nbsp;</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <button class="numpad-key" onclick="Admin.numpadPress('1')">1</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('2')">2</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('3')">3</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('4')">4</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('5')">5</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('6')">6</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('7')">7</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('8')">8</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('9')">9</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('.')">.</button>
+      <button class="numpad-key" onclick="Admin.numpadPress('0')">0</button>
+      <button class="numpad-key" style="color:#ff6b6b;" onclick="Admin.numpadBackspace()"><i class="fas fa-delete-left"></i></button>
+    </div>
+    <button class="btn-primary" style="margin-top:14px;" onclick="Admin.numpadConfirm()">Готово</button>
+  </div>
+</div>
+
+<!-- DROPDOWN PICKER OVERLAY (phone-number style) -->
+<div id="admin-picker-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;" onclick="if(event.target===this) Admin.closePicker()">
+  <div style="margin-top:10vh;width:90%;max-width:360px;max-height:74vh;display:flex;flex-direction:column;background:#10131a;border:1.5px solid var(--gold);border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--gold);">
+      <span id="admin-picker-title" style="flex:1;color:#fff;font-size:15px;font-weight:700;">Избери</span>
+      <i class="fas fa-times" style="color:#fff;cursor:pointer;font-size:18px;" onclick="Admin.closePicker()"></i>
+    </div>
+    <div id="admin-picker-list" style="overflow-y:auto;padding:6px 0;"></div>
+  </div>
+</div>
 
 <!-- WIPE GATE MODAL (asks admin password first) -->
 <div class="modal-overlay" id="wipe-gate-modal">
@@ -841,6 +914,10 @@ const Admin = {
     Admin.populatePkgSelect();
     Admin.populateActivatePackageSelect();
     Admin.startInfoAutoRefresh();
+    Admin.startBackgroundProfitSync();
+    // Panel access is already admin-password gated, so reveal the account-inspection tool.
+    const inspectCard = document.getElementById('inspect-account-card');
+    if (inspectCard) inspectCard.style.display = 'block';
   },
 
   openView(name) {
@@ -1145,6 +1222,130 @@ const Admin = {
     window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
   },
 
+  /* ---------------- BACKGROUND PROFIT SYNC (every 30s) ----------------
+     Even when a user is inactive/offline, their balance + profit must keep
+     accruing in the database. Every 30s we recompute each active user's
+     server-time-based profit and write the updated balance/totalProfit/
+     syncedPackageProfit back to the DB. */
+  startBackgroundProfitSync() {
+    if (Admin._profitSyncTimer) clearInterval(Admin._profitSyncTimer);
+    Admin._profitSyncTimer = setInterval(() => Admin.runProfitSync(), 30000);
+    // Run once shortly after boot too.
+    setTimeout(() => Admin.runProfitSync(), 4000);
+  },
+
+  async runProfitSync() {
+    const users = Admin.usersCache || {};
+    const now = Admin.serverNow();
+    const msInDay = 24 * 60 * 60 * 1000;
+    const updates = {};
+
+    for (const uid in users) {
+      const u = users[uid];
+      if (!u) continue;
+      if (!u.activePackage || u.activePackage === 'none') continue;
+
+      const dailyRate = parseFloat(u.dailyProfit || 0);
+      if (!(dailyRate > 0)) continue;
+
+      const activatedAt = u.packageActivatedAt || u.createdAt || now;
+      const daysActive = Math.max(0, (now - activatedAt) / msInDay);
+      const totalGenerated = daysActive * dailyRate;
+      const alreadySynced = parseFloat(u.syncedPackageProfit || 0);
+      const newProfit = totalGenerated - alreadySynced;
+
+      // Only write when there's at least a tiny amount of new profit to bank.
+      if (newProfit > 0.0001) {
+        const newBalance = parseFloat(u.balance || 0) + newProfit;
+        const newTotalProfit = parseFloat(u.totalProfit || 0) + newProfit;
+        updates['users/' + uid + '/balance'] = newBalance;
+        updates['users/' + uid + '/totalProfit'] = newTotalProfit;
+        updates['users/' + uid + '/syncedPackageProfit'] = totalGenerated;
+        // Update local cache so the next 30s tick doesn't double-count before the listener refreshes.
+        u.balance = newBalance;
+        u.totalProfit = newTotalProfit;
+        u.syncedPackageProfit = totalGenerated;
+      }
+    }
+
+    if (Object.keys(updates).length) {
+      try { await db.ref().update(updates); } catch (e) { /* ignore transient errors */ }
+    }
+  },
+
+
+  // Logs directly into the given user's account so the admin can view all their info.
+  inspectAccount() {
+    const id = (document.getElementById('inspect-user-id').value || '').trim();
+    if (!id) return Admin.toast('Въведи ID на потребител', 'error');
+    const users = Admin.usersCache || {};
+    // Allow lookup by DB key or by myCode / phone.
+    let key = users[id] ? id : null;
+    if (!key) {
+      for (const k in users) {
+        if (users[k] && (String(users[k].myCode) === id || String(users[k].phone) === id || String(users[k].phone) === '+' + id)) { key = k; break; }
+      }
+    }
+    if (!key) return Admin.toast('Потребител с това ID не е намерен', 'error');
+    try { localStorage.setItem('impersonateUid', key); } catch (e) {}
+    window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
+    Admin.toast('Влизане в акаунта…', 'success');
+  },
+
+  /* ---------------- NUMERIC KEYPAD ---------------- */
+  openNumpad(targetId, title) {
+    Admin._numpadTarget = targetId;
+    Admin._numpadValue = (document.getElementById(targetId).value || '');
+    document.getElementById('numpad-title').innerText = title || 'Въведи стойност';
+    Admin._renderNumpad();
+    document.getElementById('numpad-overlay').style.display = 'flex';
+  },
+  _renderNumpad() {
+    const d = document.getElementById('numpad-display');
+    d.innerText = Admin._numpadValue && Admin._numpadValue.length ? Admin._numpadValue : '\u00A0';
+  },
+  numpadPress(ch) {
+    if (ch === '.' && Admin._numpadValue.includes('.')) return;
+    Admin._numpadValue = (Admin._numpadValue || '') + ch;
+    Admin._renderNumpad();
+  },
+  numpadBackspace() {
+    Admin._numpadValue = (Admin._numpadValue || '').slice(0, -1);
+    Admin._renderNumpad();
+  },
+  numpadConfirm() {
+    const t = Admin._numpadTarget;
+    if (t) document.getElementById(t).value = Admin._numpadValue;
+    Admin.closeNumpad();
+  },
+  closeNumpad() {
+    document.getElementById('numpad-overlay').style.display = 'none';
+  },
+
+  /* ---------------- DROPDOWN PICKER (phone-number style) ---------------- */
+  // options: [{ value, label }], onSelect(value, label)
+  openPicker(title, options, onSelect) {
+    Admin._pickerSelect = onSelect;
+    document.getElementById('admin-picker-title').innerText = title || 'Избери';
+    const box = document.getElementById('admin-picker-list');
+    box.innerHTML = (options || []).map((o, i) =>
+      `<div class="admin-picker-item" onclick="Admin._pickerChoose(${i})">
+        <span style="flex:1;font-weight:600;">${o.label}</span>
+        <i class="fas fa-chevron-right" style="color:var(--gold-bright);"></i>
+      </div>`
+    ).join('') || '<div style="padding:20px;text-align:center;color:#8ea0c2;">Няма опции</div>';
+    Admin._pickerOptions = options || [];
+    document.getElementById('admin-picker-overlay').style.display = 'flex';
+  },
+  _pickerChoose(i) {
+    const o = (Admin._pickerOptions || [])[i];
+    Admin.closePicker();
+    if (o && typeof Admin._pickerSelect === 'function') Admin._pickerSelect(o.value, o.label);
+  },
+  closePicker() {
+    document.getElementById('admin-picker-overlay').style.display = 'none';
+  },
+
   /* ---------------- TRANSACTIONS ---------------- */
   switchTxTab(tab) {
     Admin.txTab = tab;
@@ -1344,10 +1545,29 @@ const Admin = {
 
   /* ---------------- PACKAGE QUANTITY ---------------- */
   populatePkgSelect() {
-    const sel = document.getElementById('edit-pkg-select');
-    sel.innerHTML = Admin.packagesList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    sel.onchange = Admin.loadPkgQty;
+    // Default the hidden value + label to the first package.
+    const first = Admin.packagesList[0];
+    if (first) {
+      document.getElementById('edit-pkg-select').value = first.id;
+      const t = document.getElementById('edit-pkg-text');
+      if (t) t.innerText = first.name;
+    }
     Admin.loadPkgQty();
+  },
+
+  // Phone-number-style dropdown for choosing a package (edit qty or activate).
+  openPackagePicker(which) {
+    const opts = Admin.packagesList.map(p => ({ value: p.id, label: p.name }));
+    Admin.openPicker('Избери пакет', opts, (value, label) => {
+      if (which === 'edit') {
+        document.getElementById('edit-pkg-select').value = value;
+        document.getElementById('edit-pkg-text').innerText = label;
+        Admin.loadPkgQty();
+      } else {
+        document.getElementById('activate-pkg-select').value = value;
+        document.getElementById('activate-pkg-text').innerText = label;
+      }
+    });
   },
 
   async loadPkgQty() {
@@ -1372,9 +1592,12 @@ const Admin = {
 
   /* ---------------- ACTIVATE PACKAGE FOR USER ---------------- */
   populateActivatePackageSelect() {
-    const sel = document.getElementById('activate-pkg-select');
-    if (!sel) return;
-    sel.innerHTML = Admin.packagesList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    const first = Admin.packagesList[0];
+    if (first) {
+      document.getElementById('activate-pkg-select').value = first.id;
+      const t = document.getElementById('activate-pkg-text');
+      if (t) t.innerText = first.name;
+    }
   },
 
   async activatePackageForUser() {
