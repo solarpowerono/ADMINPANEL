@@ -1593,7 +1593,7 @@ const Admin = {
         dailyProfit: pkg.daily,
         packagePrice: pkg.price,
         investedAmount: pkg.price,
-        packageActivatedAt: Admin.serverNow(),
+        packageActivatedAt: firebase.database.ServerValue.TIMESTAMP,
         syncedPackageProfit: 0
       });
       Admin.toast('Пакет "' + pkg.name + '" е активиран за ID ' + idInput + '.', 'success');
