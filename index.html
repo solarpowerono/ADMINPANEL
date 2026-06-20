@@ -389,14 +389,6 @@ body{
         <div class="admin-info-row"><span class="lbl">Общо потребители в базата</span><span class="val" id="info-totalusers">—</span></div>
       </div>
 
-      <div class="section-card" id="inspect-account-card" style="display:none;">
-        <div class="section-title"><i class="fas fa-magnifying-glass"></i> Инспекция на акаунт</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="inspect-user-id" placeholder="ID на потребител" readonly onclick="Admin.openNumpad('inspect-user-id')" style="flex:1;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;cursor:pointer;">
-          <button class="btn-primary" style="width:auto;padding:11px 16px;" onclick="Admin.inspectAccount()"><i class="fas fa-magnifying-glass"></i></button>
-        </div>
-      </div>
-
       <div class="section-card">
         <div class="section-title"><i class="fas fa-solar-panel"></i> Активиране на инвестиционен пакет</div>
         <input type="text" id="activate-user-id" placeholder="ID на потребител" readonly onclick="Admin.openNumpad('activate-user-id','ID на потребител')" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;cursor:pointer;">
@@ -915,9 +907,6 @@ const Admin = {
     Admin.populateActivatePackageSelect();
     Admin.startInfoAutoRefresh();
     Admin.startBackgroundProfitSync();
-    // Panel access is already admin-password gated, so reveal the account-inspection tool.
-    const inspectCard = document.getElementById('inspect-account-card');
-    if (inspectCard) inspectCard.style.display = 'block';
   },
 
   openView(name) {
@@ -1275,23 +1264,6 @@ const Admin = {
 
 
   // Logs directly into the given user's account so the admin can view all their info.
-  inspectAccount() {
-    const id = (document.getElementById('inspect-user-id').value || '').trim();
-    if (!id) return Admin.toast('Въведи ID на потребител', 'error');
-    const users = Admin.usersCache || {};
-    // Allow lookup by DB key or by myCode / phone.
-    let key = users[id] ? id : null;
-    if (!key) {
-      for (const k in users) {
-        if (users[k] && (String(users[k].myCode) === id || String(users[k].phone) === id || String(users[k].phone) === '+' + id)) { key = k; break; }
-      }
-    }
-    if (!key) return Admin.toast('Потребител с това ID не е намерен', 'error');
-    try { localStorage.setItem('impersonateUid', key); } catch (e) {}
-    window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
-    Admin.toast('Влизане в акаунта…', 'success');
-  },
-
   /* ---------------- NUMERIC KEYPAD ---------------- */
   openNumpad(targetId, title) {
     Admin._numpadTarget = targetId;
