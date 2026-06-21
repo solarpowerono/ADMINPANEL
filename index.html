@@ -41,7 +41,6 @@ body{
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-thumb{background:var(--gold);border-radius:10px;}
 
-/* ---------- LOGIN GATE ---------- */
 #gate{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:18px; text-align:center; padding:30px 10px;
@@ -64,7 +63,6 @@ body{
 #gate .setup-note{font-size:11px;color:#8ea0c2;max-width:340px;line-height:1.5;}
 #gate .lockout-note{color:var(--red-off-bright);font-size:13px;font-weight:800;max-width:340px;line-height:1.5;}
 
-/* ---------- INTRUSION ALERT (red full-screen warning) ---------- */
 .intrusion-overlay{
   display:none;position:fixed;inset:0;z-index:2000;
   background:rgba(60,0,0,0.92);
@@ -88,7 +86,6 @@ body{
   background:transparent;color:#fff;font-weight:800;font-size:13px;cursor:pointer;
 }
 
-/* ---------- TOP NAV (4 square buttons) ---------- */
 #admin-root{display:none;flex-direction:column;gap:14px;}
 
 .top-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
@@ -111,7 +108,6 @@ body{
   border:1px solid var(--navy-deep);
 }
 
-/* ---------- ADMIN INFO big bar ---------- */
 .admin-info-btn{
   width:100%;padding:14px 16px;border-radius:var(--radius-md);
   background:var(--card-bg);border:1.5px solid var(--gold);
@@ -131,7 +127,6 @@ body{
 .admin-info-row .lbl{color:var(--text-dim);font-weight:600;}
 .admin-info-row .val{color:#fff;font-weight:900;font-size:14px;}
 
-/* ---------- generic section card ---------- */
 .section-card{
   background:var(--card-bg);border:1.5px solid var(--gold);border-radius:var(--radius-md);
   padding:14px;display:flex;flex-direction:column;gap:10px;
@@ -139,7 +134,6 @@ body{
 .section-title{font-size:13px;font-weight:900;letter-spacing:0.5px;color:#fff;display:flex;align-items:center;gap:8px;}
 .section-title i{color:var(--gold-bright);}
 
-/* ---------- toggle squares row ---------- */
 .toggle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .toggle-sq{
   aspect-ratio:1/1;border-radius:var(--radius-md);
@@ -155,11 +149,10 @@ body{
 .toggle-sq.on i{color:var(--green-on-bright);}
 .toggle-sq.danger{background:#3a0a10;border-color:var(--red-off-bright);}
 .toggle-sq.danger i{color:var(--red-off-bright);}
-/* Wipe button is now icon-only */
+
 .toggle-sq.icon-only span{display:none;}
 .toggle-sq.icon-only i{font-size:26px;}
 
-/* ---------- views (full screen sections) ---------- */
 .view{display:none;flex-direction:column;gap:12px;}
 .view.active{display:flex;}
 .view-header{display:flex;align-items:center;gap:10px;}
@@ -170,7 +163,6 @@ body{
 }
 .view-header h2{font-size:16px;font-weight:900;}
 
-/* search bar */
 .search-bar{
   display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);
   border:1px solid var(--gold);border-radius:var(--radius-sm);padding:10px 14px;
@@ -181,7 +173,6 @@ body{
 }
 .search-bar input::placeholder{color:#8ea0c2;font-weight:500;}
 
-/* tab pair */
 .tab-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .tab-btn{
@@ -207,7 +198,6 @@ body{
   color:var(--gold-bright);
 }
 
-/* BIG ID card (Users + Data lists) */
 .id-card{
   background:rgba(255,255,255,0.05);border:1.5px solid var(--gold);border-radius:14px;
   padding:18px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
@@ -222,7 +212,6 @@ body{
   display:flex;align-items:center;justify-content:center;font-size:16px;
 }
 
-/* user profile editor */
 .field-block{display:flex;flex-direction:column;gap:4px;}
 .field-block .f-label{font-size:11px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.4px;}
 .field-row{display:flex;align-items:center;gap:8px;}
@@ -249,7 +238,6 @@ body{
   background:rgba(255,59,78,0.12);color:#ff8a96;font-weight:800;font-size:13px;cursor:pointer;
 }
 
-/* profile stat block (read-only highlighted) */
 .stat-block{
   background:rgba(255,255,255,0.05);border:1px solid var(--gold);border-radius:10px;
   padding:12px 14px;display:flex;justify-content:space-between;align-items:center;
@@ -257,7 +245,6 @@ body{
 .stat-block .s-label{font-size:11.5px;color:var(--text-dim);font-weight:700;}
 .stat-block .s-value{font-size:14px;color:#fff;font-weight:900;}
 
-/* chat thread */
 .chat-thread{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;padding:8px;}
 .msg{max-width:78%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.35;}
 .msg.user{align-self:flex-start;background:rgba(255,255,255,0.08);border:1px solid var(--gold);}
@@ -273,7 +260,6 @@ body{
   color:#fff;cursor:pointer;
 }
 
-/* toast */
 #toast{
   position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
   background:#111;border:1px solid var(--gold);color:#fff;padding:12px 18px;border-radius:10px;
@@ -283,7 +269,6 @@ body{
 #toast.error{border-color:var(--red-off-bright);}
 #toast.success{border-color:var(--green-on-bright);}
 
-/* modal */
 .modal-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:998;
   align-items:center;justify-content:center;padding:20px;
@@ -307,7 +292,6 @@ body{
 
 .small-note{font-size:10.5px;color:#8ea0c2;text-align:center;}
 
-/* Numeric keypad keys */
 .numpad-key{
   padding:16px 0;font-size:22px;font-weight:800;color:#fff;
   background:rgba(255,255,255,0.06);border:1.5px solid var(--gold);
@@ -316,7 +300,6 @@ body{
 .numpad-key:hover{background:rgba(212,175,55,0.18);}
 .numpad-key:active{border-color:var(--gold-bright);box-shadow:0 0 14px rgba(212,175,55,0.5);}
 
-/* Dropdown picker rows */
 .admin-picker-item{
   display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;
   color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);
@@ -332,7 +315,6 @@ body{
 <body>
 <div id="app">
 
-  <!-- ============ INTRUSION ALERT ============ -->
   <div class="intrusion-overlay" id="intrusion-overlay">
     <div class="intrusion-box">
       <i class="fas fa-triangle-exclamation"></i>
@@ -343,7 +325,6 @@ body{
     </div>
   </div>
 
-  <!-- ============ LOGIN GATE ============ -->
   <div id="gate">
     <i class="fas fa-lock lock-icon"></i>
     <input type="password" id="gate-pass" placeholder="Парола за достъп" autocomplete="off"
@@ -354,10 +335,8 @@ body{
     <div class="setup-note" id="gate-setup-note"></div>
   </div>
 
-  <!-- ============ ADMIN ROOT ============ -->
   <div id="admin-root">
 
-    <!-- HOME -->
     <div class="view active" id="view-home">
 
       <div class="top-nav">
@@ -391,7 +370,7 @@ body{
 
       <div class="section-card">
         <div class="section-title"><i class="fas fa-solar-panel"></i> Активиране на инвестиционен пакет</div>
-        <input type="text" id="activate-user-id" placeholder="ID на потребител" readonly onclick="Admin.openNumpad('activate-user-id','ID на потребител')" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;cursor:pointer;">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="activate-user-id" placeholder="ID на потребител" style="width:100%;padding:11px;border-radius:8px;border:1px solid var(--gold);background:rgba(255,255,255,0.06);color:#fff;font-weight:700;font-size:13px;margin-bottom:8px;">
         <div class="admin-picker-trigger" style="margin-bottom:8px;" onclick="Admin.openPackagePicker('activate')">
           <span id="activate-pkg-text">Избери пакет</span>
           <i class="fas fa-chevron-down" style="color:var(--gold-bright);"></i>
@@ -408,7 +387,7 @@ body{
         </div>
         <input type="hidden" id="edit-pkg-select">
         <div class="field-row" style="margin-top:10px;">
-          <input type="text" id="edit-pkg-qty" placeholder="Оставащо количество" readonly onclick="Admin.openNumpad('edit-pkg-qty','Оставащо количество')" style="cursor:pointer;">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" id="edit-pkg-qty" placeholder="Оставащо количество">
           <button class="pencil-btn" onclick="Admin.savePkgQty()"><i class="fas fa-check"></i></button>
         </div>
       </div>
@@ -430,7 +409,6 @@ body{
 
     </div>
 
-    <!-- ============ USERS VIEW ============ -->
     <div class="view" id="view-users">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
@@ -451,7 +429,6 @@ body{
       <div class="list-wrap" id="users-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
-    <!-- ============ USER PROFILE EDITOR ============ -->
     <div class="view" id="view-user-edit">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('users')"><i class="fas fa-arrow-left"></i></div>
@@ -463,7 +440,6 @@ body{
       </div>
     </div>
 
-    <!-- ============ TRANSACTIONS VIEW ============ -->
     <div class="view" id="view-transactions">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
@@ -480,7 +456,6 @@ body{
       <div class="list-wrap" id="tx-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
-    <!-- ============ CHAT SUPPORT VIEW ============ -->
     <div class="view" id="view-chat">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
@@ -497,7 +472,6 @@ body{
       <div class="list-wrap" id="chat-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
-    <!-- ============ CHAT THREAD VIEW ============ -->
     <div class="view" id="view-chat-thread">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('chat')"><i class="fas fa-arrow-left"></i></div>
@@ -510,7 +484,6 @@ body{
       </div>
     </div>
 
-    <!-- ============ DEVICES / DATA VIEW ============ -->
     <div class="view" id="view-devices">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('home')"><i class="fas fa-arrow-left"></i></div>
@@ -531,7 +504,6 @@ body{
       <div class="list-wrap" id="devices-list"><div class="list-empty">Зареждане...</div></div>
     </div>
 
-    <!-- ============ DEVICE DETAIL VIEW ============ -->
     <div class="view" id="view-device-detail">
       <div class="view-header">
         <div class="back-btn" onclick="Admin.openView('devices')"><i class="fas fa-arrow-left"></i></div>
@@ -545,7 +517,6 @@ body{
 
 <div id="toast"></div>
 
-<!-- NUMERIC KEYPAD MODAL -->
 <div id="numpad-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;" onclick="if(event.target===this) Admin.closeNumpad()">
   <div style="width:90%;max-width:320px;background:#10131a;border:1.5px solid var(--gold);border-radius:18px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -571,7 +542,6 @@ body{
   </div>
 </div>
 
-<!-- DROPDOWN PICKER OVERLAY (phone-number style) -->
 <div id="admin-picker-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;" onclick="if(event.target===this) Admin.closePicker()">
   <div style="margin-top:10vh;width:90%;max-width:360px;max-height:74vh;display:flex;flex-direction:column;background:#10131a;border:1.5px solid var(--gold);border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
     <div style="display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--gold);">
@@ -582,7 +552,6 @@ body{
   </div>
 </div>
 
-<!-- WIPE GATE MODAL (asks admin password first) -->
 <div class="modal-overlay" id="wipe-gate-modal">
   <div class="modal-box neutral">
     <h3><i class="fas fa-key"></i> Потвърди самоличност</h3>
@@ -595,7 +564,6 @@ body{
   </div>
 </div>
 
-<!-- WIPE CHOICE MODAL (export / delete) -->
 <div class="modal-overlay" id="wipe-choice-modal">
   <div class="modal-box neutral">
     <h3><i class="fas fa-database"></i> Управление на базата данни</h3>
@@ -608,7 +576,6 @@ body{
   </div>
 </div>
 
-<!-- WIPE CONFIRM MODAL (delete phrase) -->
 <div class="modal-overlay" id="wipe-modal">
   <div class="modal-box">
     <h3><i class="fas fa-triangle-exclamation"></i> Изтриване на цялата база</h3>
@@ -622,9 +589,7 @@ body{
 </div>
 
 <script>
-/* =========================================================================
-   FIREBASE INIT — same project as the main app (solar-power-ono)
-   ========================================================================= */
+
 const firebaseConfig = {
     apiKey: "AIzaSyCKD4r6pVA4QRQxOt9zsJ2icBghkPK3_qU",
     authDomain: "solar-power-ono.firebaseapp.com",
@@ -638,20 +603,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* =========================================================================
-   SHA-256 helper (Web Crypto) — admin password / wipe phrase are never
-   stored as plain text in this file; only their hash is compared against
-   a hash stored in the database under admin_config/.
-   ========================================================================= */
 async function sha256(text) {
   const enc = new TextEncoder().encode(text);
   const buf = await crypto.subtle.digest('SHA-256', enc);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* =========================================================================
-   Admin object — all panel logic lives here
-   ========================================================================= */
 const Admin = {
   usersCache: {},
   withdrawalsCache: {},
@@ -697,9 +654,6 @@ const Admin = {
     solar_power_infinity:{ name: 'Solar Legendary', price: 20000, daily: 1700 }
   },
 
-  /* ---------------- SERVER TIME (immune to device clock) ----------------
-     Locks onto Firebase .info/serverTimeOffset so all lockout timing is
-     based on authoritative server time, not the device clock/date. */
   initServerTime() {
     try {
       const offRef = db.ref('.info/serverTimeOffset');
@@ -710,18 +664,13 @@ const Admin = {
           Admin.serverTimeReady = true;
         }
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
   },
 
   serverNow() {
     return Date.now() + (Admin.serverTimeOffset || 0);
   },
 
-  /* ---------------- LOGIN with lockout ----------------
-     After 3 wrong passwords the gate locks for 20 minutes. The lock end
-     time is stored on the SERVER (admin_security/lockUntil) as a server
-     timestamp, so changing the device clock/date cannot bypass it. An
-     intrusion flag is written so the legitimate admin sees a red alert. */
   async tryLogin() {
     const passEl = document.getElementById('gate-pass');
     const pass = passEl.value.trim();
@@ -729,7 +678,6 @@ const Admin = {
     const btn = document.getElementById('gate-unlock-btn');
     errEl.innerText = '';
 
-    // Block immediately if currently locked out (server-time based)
     const locked = await Admin.getLockRemainingMs();
     if (locked > 0) {
       Admin.showLockout(locked);
@@ -772,7 +720,7 @@ const Admin = {
           errEl.innerText = 'Грешна парола. Оставащи опити: ' + remaining + '.';
           btn.disabled = false; btn.innerText = 'ОТКЛЮЧИ';
         } else {
-          // Just hit the limit -> locked
+
           const ms = await Admin.getLockRemainingMs();
           Admin.showLockout(ms);
         }
@@ -783,7 +731,6 @@ const Admin = {
     }
   },
 
-  /* Records a failed attempt on the server. Returns remaining attempts (0 = now locked). */
   async registerFailedAttempt() {
     const MAX = 3;
     const LOCK_MS = 20 * 60 * 1000;
@@ -794,7 +741,7 @@ const Admin = {
       let fails = (data.failedAttempts || 0) + 1;
       const updates = { failedAttempts: fails, lastFailServer: firebase.database.ServerValue.TIMESTAMP };
       if (fails >= MAX) {
-        // Lock end = server time + 20 min, written via server timestamp + offset write
+
         updates.lockUntil = Admin.serverNow() + LOCK_MS;
         updates.intrusion = true;
         updates.intrusionServer = firebase.database.ServerValue.TIMESTAMP;
@@ -815,10 +762,9 @@ const Admin = {
         lockUntil: 0,
         intrusion: false
       });
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
   },
 
-  /* Returns remaining lockout time in ms (0 if not locked), using SERVER time. */
   async getLockRemainingMs() {
     try {
       const snap = await db.ref('admin_security/lockUntil').get();
@@ -835,7 +781,7 @@ const Admin = {
     btn.disabled = true;
     if (Admin.lockoutTimer) clearInterval(Admin.lockoutTimer);
     const tick = () => {
-      // Recompute remaining time from server time on every tick.
+
       const left = Math.max(0, Math.round((Admin._lockEnd - Admin.serverNow()) / 1000));
       const mm = String(Math.floor(left / 60)).padStart(2, '0');
       const ss = String(left % 60).padStart(2, '0');
@@ -853,7 +799,6 @@ const Admin = {
     Admin.lockoutTimer = setInterval(tick, 1000);
   },
 
-  /* Live-watch the intrusion flag so the real admin gets a red alert. */
   listenIntrusion() {
     db.ref('admin_security').on('value', snap => {
       const d = snap.exists() ? snap.val() : {};
@@ -891,22 +836,42 @@ const Admin = {
       document.getElementById('admin-root').style.display = 'flex';
       Admin.boot();
     } else {
-      // On the gate: if a lockout is active, reflect it immediately
+
       Admin.getLockRemainingMs().then(ms => { if (ms > 0) Admin.showLockout(ms); });
     }
   },
 
-  /* ---------------- BOOT ---------------- */
   boot() {
     Admin.listenUsers();
     Admin.listenWithdrawals();
     Admin.listenChats();
     Admin.listenSessions();
     Admin.listenSettings();
+    Admin.seedBrandColors();
     Admin.populatePkgSelect();
     Admin.populateActivatePackageSelect();
     Admin.startInfoAutoRefresh();
     Admin.startBackgroundProfitSync();
+  },
+
+  seedBrandColors() {
+    const ref = db.ref('settings/brandColors');
+    ref.once('value').then(snap => {
+      if (snap.exists()) return;
+      ref.set({
+        gold: '#B8860B',
+        goldBright: '#FFD700',
+        silver: '#C7CDD4',
+        black: '#000000',
+        cream: '#F8F0E3',
+        blue: '#2f8bff',
+        darkNavy: '#061224',
+        freshGreen: '#00d63a',
+        errorRed: '#ff1133',
+        successGreen: '#00d63a',
+        adminPurple: '#b000ff'
+      });
+    }).catch(() => {});
   },
 
   openView(name) {
@@ -948,7 +913,6 @@ const Admin = {
     return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDT';
   },
 
-  /* ---------------- LIVE LISTENERS ---------------- */
   listenUsers() {
     db.ref('users').on('value', snap => {
       Admin.usersCache = snap.exists() ? snap.val() : {};
@@ -1008,7 +972,6 @@ const Admin = {
     el.classList.toggle('on', isOn);
   },
 
-  /* ---------------- ADMIN INFO (auto-refresh every second) ---------------- */
   startInfoAutoRefresh() {
     if (Admin.infoTimer) clearInterval(Admin.infoTimer);
     Admin.renderAdminInfo();
@@ -1046,7 +1009,6 @@ const Admin = {
     set('info-totalusers', totalUsers);
   },
 
-  /* ---------------- USERS LIST ---------------- */
   switchUsersTab(tab) {
     Admin.usersTab = tab;
     document.getElementById('utab-premium').classList.toggle('active', tab === 'premium');
@@ -1077,7 +1039,6 @@ const Admin = {
 
     if (source.length === 0) { list.innerHTML = '<div class="list-empty">Няма намерени потребители.</div>'; return; }
 
-    // BIG ID cards
     list.innerHTML = source.map(([key, u]) => `
       <div class="id-card" onclick="Admin.openUserEdit('${key}')">
         <span class="id-big">${u.myCode || key}</span>
@@ -1086,7 +1047,6 @@ const Admin = {
     `).join('');
   },
 
-  /* ---------------- USER EDIT ---------------- */
   computeUserStats(u) {
     let totalWithdrawn = 0;
     if (u.withdrawals) {
@@ -1107,7 +1067,6 @@ const Admin = {
     const stats = Admin.computeUserStats(u);
     const regDate = u.createdAt ? new Date(u.createdAt).toLocaleString('bg-BG') : '—';
 
-    // Editable crypto address (with pencil) + read-only stat blocks
     const html = `
       <div class="field-block">
         <span class="f-label">Крипто адрес за теглене</span>
@@ -1206,20 +1165,15 @@ const Admin = {
   enterAccount() {
     const key = Admin.currentEditKey;
     if (!key) return;
-    // Open the main app impersonating this user (main app reads ?impersonate=KEY)
+
     try { localStorage.setItem('impersonateUid', key); } catch (e) {}
     window.open('index.html?impersonate=' + encodeURIComponent(key), '_blank');
   },
 
-  /* ---------------- BACKGROUND PROFIT SYNC (every 30s) ----------------
-     Even when a user is inactive/offline, their balance + profit must keep
-     accruing in the database. Every 30s we recompute each active user's
-     server-time-based profit and write the updated balance/totalProfit/
-     syncedPackageProfit back to the DB. */
   startBackgroundProfitSync() {
     if (Admin._profitSyncTimer) clearInterval(Admin._profitSyncTimer);
     Admin._profitSyncTimer = setInterval(() => Admin.runProfitSync(), 30000);
-    // Run once shortly after boot too.
+
     setTimeout(() => Admin.runProfitSync(), 4000);
   },
 
@@ -1243,14 +1197,13 @@ const Admin = {
       const alreadySynced = parseFloat(u.syncedPackageProfit || 0);
       const newProfit = totalGenerated - alreadySynced;
 
-      // Only write when there's at least a tiny amount of new profit to bank.
       if (newProfit > 0.0001) {
         const newBalance = parseFloat(u.balance || 0) + newProfit;
         const newTotalProfit = parseFloat(u.totalProfit || 0) + newProfit;
         updates['users/' + uid + '/balance'] = newBalance;
         updates['users/' + uid + '/totalProfit'] = newTotalProfit;
         updates['users/' + uid + '/syncedPackageProfit'] = totalGenerated;
-        // Update local cache so the next 30s tick doesn't double-count before the listener refreshes.
+
         u.balance = newBalance;
         u.totalProfit = newTotalProfit;
         u.syncedPackageProfit = totalGenerated;
@@ -1258,13 +1211,10 @@ const Admin = {
     }
 
     if (Object.keys(updates).length) {
-      try { await db.ref().update(updates); } catch (e) { /* ignore transient errors */ }
+      try { await db.ref().update(updates); } catch (e) {  }
     }
   },
 
-
-  // Logs directly into the given user's account so the admin can view all their info.
-  /* ---------------- NUMERIC KEYPAD ---------------- */
   openNumpad(targetId, title) {
     Admin._numpadTarget = targetId;
     Admin._numpadValue = (document.getElementById(targetId).value || '');
@@ -1294,8 +1244,6 @@ const Admin = {
     document.getElementById('numpad-overlay').style.display = 'none';
   },
 
-  /* ---------------- DROPDOWN PICKER (phone-number style) ---------------- */
-  // options: [{ value, label }], onSelect(value, label)
   openPicker(title, options, onSelect) {
     Admin._pickerSelect = onSelect;
     document.getElementById('admin-picker-title').innerText = title || 'Избери';
@@ -1318,7 +1266,6 @@ const Admin = {
     document.getElementById('admin-picker-overlay').style.display = 'none';
   },
 
-  /* ---------------- TRANSACTIONS ---------------- */
   switchTxTab(tab) {
     Admin.txTab = tab;
     document.getElementById('ttab-pending').classList.toggle('active', tab === 'pending');
@@ -1368,7 +1315,6 @@ const Admin = {
     }
   },
 
-  /* ---------------- CHAT SUPPORT ---------------- */
   switchChatTab(tab) {
     Admin.chatTab = tab;
     document.getElementById('ctab-unread').classList.toggle('active', tab === 'unread');
@@ -1442,7 +1388,6 @@ const Admin = {
     }
   },
 
-  /* ---------------- DEVICES / SESSION DATA ---------------- */
   switchDevicesTab(tab) {
     Admin.devicesTab = tab;
     document.getElementById('dtab-active').classList.toggle('active', tab === 'active');
@@ -1457,7 +1402,6 @@ const Admin = {
     const q = (document.getElementById('devices-search').value || '').toLowerCase().trim();
     let entries = Object.entries(Admin.sessionsCache || {});
 
-    // "Active" = seen within the last 2 minutes (heartbeat from the user app)
     const ACTIVE_MS = 2 * 60 * 1000;
     const now = Admin.serverNow();
     const activeEntries = entries.filter(([uid, s]) => s.lastSeen && (now - s.lastSeen) < ACTIVE_MS);
@@ -1475,7 +1419,7 @@ const Admin = {
     }
 
     const dot = (tab === 'active') ? '<span class="id-online">●</span>' : '';
-    // BIG ID cards, each with a DELETE button beside the ID
+
     list.innerHTML = source.map(([uid, s]) => `
       <div class="id-card">
         <span class="id-big" onclick="Admin.openDeviceDetail('${uid}')" style="flex:1;">${dot}${s.myCode || uid}</span>
@@ -1515,9 +1459,8 @@ const Admin = {
     Admin.openView('device-detail');
   },
 
-  /* ---------------- PACKAGE QUANTITY ---------------- */
   populatePkgSelect() {
-    // Default the hidden value + label to the first package.
+
     const first = Admin.packagesList[0];
     if (first) {
       document.getElementById('edit-pkg-select').value = first.id;
@@ -1527,7 +1470,6 @@ const Admin = {
     Admin.loadPkgQty();
   },
 
-  // Phone-number-style dropdown for choosing a package (edit qty or activate).
   openPackagePicker(which) {
     const opts = Admin.packagesList.map(p => ({ value: p.id, label: p.name }));
     Admin.openPicker('Избери пакет', opts, (value, label) => {
@@ -1547,7 +1489,7 @@ const Admin = {
     try {
       const snap = await db.ref('settings/stock/' + id).get();
       document.getElementById('edit-pkg-qty').value = snap.exists() ? snap.val() : '';
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
   },
 
   async savePkgQty() {
@@ -1562,7 +1504,6 @@ const Admin = {
     }
   },
 
-  /* ---------------- ACTIVATE PACKAGE FOR USER ---------------- */
   populateActivatePackageSelect() {
     const first = Admin.packagesList[0];
     if (first) {
@@ -1603,7 +1544,6 @@ const Admin = {
     }
   },
 
-  /* ---------------- TOGGLES (promo / legendary / lock) ---------------- */
   async toggleSetting(settingKey, btnId) {
     try {
       if (settingKey === 'isPromoActive') {
@@ -1626,11 +1566,6 @@ const Admin = {
     }
   },
 
-  /* ---------------- WIPE DATABASE (split: gate -> choice -> export / delete) ----------------
-     Step 1: openWipeGate() asks for the ADMIN-PANEL password.
-     Step 2: on correct password -> wipe-choice modal with two buttons:
-             (a) Export everything to a CSV file (User ID, Phone, Name, Invested)
-             (b) Full delete -> asks for the separate WIPE password, then erases all. */
   openWipeGate() {
     document.getElementById('wipe-gate-pass').value = '';
     document.getElementById('wipe-gate-modal').classList.add('show');
@@ -1663,7 +1598,6 @@ const Admin = {
     document.getElementById('wipe-choice-modal').classList.remove('show');
   },
 
-  /* Export everything as a downloadable CSV (opens in Excel; can be copied to a USB stick). */
   exportAllData() {
     const users = Admin.usersCache || {};
     const rows = [['User ID', 'Телефонен номер', 'Име', 'Инвестирани пари (USDT)']];
@@ -1678,7 +1612,6 @@ const Admin = {
       rows.push([id, phone, name, invested.toFixed(2)]);
     });
 
-    // Build CSV (escape quotes, wrap each cell). BOM so Excel reads UTF-8 (Cyrillic) correctly.
     const csv = rows.map(r =>
       r.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')
     ).join('\r\n');
@@ -1730,12 +1663,10 @@ const Admin = {
   }
 };
 
-/* Enter key on the gate triggers login */
 document.getElementById('gate-pass').addEventListener('keydown', e => {
   if (e.key === 'Enter') Admin.tryLogin();
 });
 
-/* Server time + intrusion watch start immediately (even before unlock) */
 Admin.initServerTime();
 Admin.listenIntrusion();
 Admin.checkExistingSession();
