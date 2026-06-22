@@ -1448,6 +1448,9 @@ const Admin = {
       { label: 'Език на браузъра', value: s.language || '—' },
       { label: 'Часова зона', value: s.timezone || '—' },
       { label: 'Размер на екрана', value: s.screen || '—' },
+      { label: 'Последна активност (раздел)', value: s.lastActivity || '—' },
+      { label: 'Време на последна активност', value: s.lastActivityTime ? new Date(s.lastActivityTime).toLocaleString('bg-BG') : '—' },
+      { label: 'Активност в сайта (последни действия)', value: s.activityLog || '—' },
       { label: 'Последно видян', value: s.lastSeen ? new Date(s.lastSeen).toLocaleString('bg-BG') : '—' }
     ];
     document.getElementById('dd-fields').innerHTML = rows.map(r => `
